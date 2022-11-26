@@ -1,0 +1,21 @@
+{
+  "name": "robot_controller",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --inspect index.js",
+    "watch": "node-sass --watch resources\\scss -o public\\css",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-handlebars": "^6.0.6",
+    "firebase": "^8.10.0",
+    "method-override": "^3.0.0",
+    "node-sass": "^8.0.0",
+    "nodemon": "^2.0.20"
+  }
+}
