@@ -76,15 +76,16 @@ void loop()
     //   Serial.println(sendMsg);
     // }
     Serial.println("--------------------------------");
+  }
     sendMsg = theta1 + '~' + theta2 + '~' + theta3 + '>';
     strcat(sendMsgChar,sendMsg.c_str());
     Serial.println(sendMsgChar);
     // SUART.print(sendMsgChar); 
     SUART.print(theta1); 
-    // SUART.print('~'); 
+    SUART.print('~'); 
     SUART.print(theta2); 
-    // SUART.print('~'); 
+    SUART.print('~'); 
     SUART.print(theta3); 
     SUART.print('>'); 
-  }
+    delay(1);
 }

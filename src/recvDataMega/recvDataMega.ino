@@ -19,13 +19,14 @@ void setup()
 void loop()
 {
 
-  if ((millis() - millisRecv > 100 || millisRecv == 0)) {
+  // if ((millis() - millisRecv > 100 || millisRecv == 0)) {
   byte n = mySerial.available();
   if (n != 0)
   {
     int c = mySerial.read(); 
       if (c != '>')
         buff[indx++] = c;
+   
       else {
         indexTheta = 0;
         Serial.println(buff);  
@@ -50,7 +51,7 @@ void loop()
         memset(buff, 0, 50);
       }
     }
-  }
+  // }
   // Serial.println("----------Start--------");
   // DynamicJsonDocument doc(2048);
   // String com = Serial1.readString();
@@ -72,6 +73,7 @@ void loop()
   // Serial.print(data3);
   // Serial.println("");
   // Serial.println("---------------------xxxxx--------------------");
+    delay(1);
  
  
 }

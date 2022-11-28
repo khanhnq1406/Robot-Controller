@@ -1,113 +1,225 @@
 <body class="home">
-
-  <form action="" method="POST">
-    <div class="container theta1-container">
-      <div class="row">
-        <div class="col">
-          <h1 class="display-1 text">Theta 1</h1>
-        </div>
-        <div class="col-8">
-          <input
-            type="range"
-            class="form-range theta1 range-input"
-            id="theta1"
-            min="0"
-            max="360"
-            oninput="rangeValueTheta1.innerText = this.value"
-            name="theta1"
-            onchange="this.form.submit()"
-            value="{{theta1}}"
-          />
-        </div>
-        <div class="col">
-          <h1 id="rangeValueTheta1" class="display-1 text">{{theta1}}</h1>
-        </div>
-        <div class="col">
-          <input
-            type="number"
-            class="form-control"
-            value="{{theta1}}"
-            name="theta1Number"
-            min="0"
-            max="360"
-            onchange="this.form.submit()"
-          />
-        </div>
-      </div>
-    </div>
-
-    <div class="container theta2-container">
-      <div class="row">
-        <div class="col">
-          <h1 class="display-1 text">Theta 2</h1>
-        </div>
-        <div class="col-8">
-          <input
-            type="range"
-            class="form-range theta2 range-input"
-            id="theta2"
-            min="0"
-            max="360"
-            oninput="rangeValueTheta2.innerText = this.value"
-            name="theta2"
-            onchange="this.form.submit()"
-            value="{{theta2}}"
-          />
-        </div>
-        <div class="col">
-          <h1 id="rangeValueTheta2" class="display-1 text">{{theta2}}</h1>
-        </div>
-        <div class="col">
-          <input
-            type="number"
-            class="form-control"
-            value="{{theta2}}"
-            name="theta2Number"
-            min="0"
-            max="360"
-            onchange="this.form.submit()"
-          />
+  <div class="theta-div">
+    <form action="" method="POST">
+      <div class="container theta1-container">
+        <div class="row">
+          <div class="col">
+            <h1 class="display-1 text">Theta 1</h1>
+          </div>
+          <div class="col-8">
+            <input
+              type="range"
+              class="form-range theta1 range-input"
+              id="theta1"
+              min="0"
+              max="360"
+              oninput="rangeValueTheta1.innerText = this.value"
+              name="theta1"
+              onchange="this.form.submit()"
+              value="{{theta1}}"
+            />
+          </div>
+          <div class="col">
+            <h1 id="rangeValueTheta1" class="display-1 text">{{theta1}}</h1>
+          </div>
+          <div class="col">
+            <input
+              type="number"
+              class="form-control"
+              value="{{theta1}}"
+              name="theta1Number"
+              min="0"
+              max="360"
+              onchange="this.form.submit()"
+            />
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="container theta3-container">
-      <div class="row">
-        <div class="col">
-          <h1 class="display-1 text">Theta 3</h1>
-        </div>
-        <div class="col-8">
-          <input
-            type="range"
-            class="form-range theta3 range-input"
-            id="theta3"
-            min="0"
-            max="360"
-            oninput="rangeValueTheta3.innerText = this.value"
-            name="theta3"
-            onchange="this.form.submit()"
-            value="{{theta3}}"
-          />
-        </div>
-        <div class="col">
-          <h1 id="rangeValueTheta3" class="display-1 text">{{theta3}}</h1>
-        </div>
-        <div class="col">
-          <input
-            type="number"
-            class="form-control"
-            value="{{theta3}}"
-            name="theta3Number"
-            min="0"
-            max="360"
-            onchange="this.form.submit()"
-          />
+      <div class="container theta2-container">
+        <div class="row">
+          <div class="col">
+            <h1 class="display-1 text">Theta 2</h1>
+          </div>
+          <div class="col-8">
+            <input
+              type="range"
+              class="form-range theta2 range-input"
+              id="theta2"
+              min="0"
+              max="360"
+              oninput="rangeValueTheta2.innerText = this.value"
+              name="theta2"
+              onchange="this.form.submit()"
+              value="{{theta2}}"
+            />
+          </div>
+          <div class="col">
+            <h1 id="rangeValueTheta2" class="display-1 text">{{theta2}}</h1>
+          </div>
+          <div class="col">
+            <input
+              type="number"
+              class="form-control"
+              value="{{theta2}}"
+              name="theta2Number"
+              min="0"
+              max="360"
+              onchange="this.form.submit()"
+            />
+          </div>
         </div>
       </div>
-    </div>
-  </form>
-  {{! <script>
-    function theta1(theta1) { console.log(theta1); } function theta2(theta2) {
-    console.log(theta2); } function theta3(theta3) { console.log(theta3); }
-  </script> }}
+
+      <div class="container theta3-container">
+        <div class="row">
+          <div class="col">
+            <h1 class="display-1 text">Theta 3</h1>
+          </div>
+          <div class="col-8">
+            <input
+              type="range"
+              class="form-range theta3 range-input"
+              id="theta3"
+              min="0"
+              max="360"
+              oninput="rangeValueTheta3.innerText = this.value"
+              name="theta3"
+              onchange="this.form.submit()"
+              value="{{theta3}}"
+            />
+          </div>
+          <div class="col">
+            <h1 id="rangeValueTheta3" class="display-1 text">{{theta3}}</h1>
+          </div>
+          <div class="col">
+            <input
+              type="number"
+              class="form-control"
+              value="{{theta3}}"
+              name="theta3Number"
+              min="0"
+              max="360"
+              onchange="this.form.submit()"
+            />
+          </div>
+        </div>
+      </div>
+  </div>
+  <div class="position-div">
+      <div class="container theta1-container">
+        <div class="row">
+          <div class="col">
+            <h1 class="display-1 text">P1</h1>
+          </div>
+          <div class="col-8">
+            <input
+              type="range"
+              class="form-range position1 range-input"
+              id="position1"
+              min="0"
+              max="360"
+              oninput="rangeValuePosition1.innerText = this.value"
+              name="position1"
+              onchange="this.form.submit()"
+              value="{{position1}}"
+            />
+          </div>
+          <div class="col">
+            <h1
+              id="rangeValuePosition1"
+              class="display-1 text"
+            >{{position1}}</h1>
+          </div>
+          <div class="col">
+            <input
+              type="number"
+              class="form-control"
+              value="{{position1}}"
+              name="position1Number"
+              min="0"
+              max="360"
+              onchange="this.form.submit()"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="container theta2-container">
+        <div class="row">
+          <div class="col">
+            <h1 class="display-1 text">P2</h1>
+          </div>
+          <div class="col-8">
+            <input
+              type="range"
+              class="form-range position2 range-input"
+              id="position2"
+              min="0"
+              max="360"
+              oninput="rangeValuePosition2.innerText = this.value"
+              name="position2"
+              onchange="this.form.submit()"
+              value="{{position2}}"
+            />
+          </div>
+          <div class="col">
+            <h1
+              id="rangeValuePosition2"
+              class="display-1 text"
+            >{{position2}}</h1>
+          </div>
+          <div class="col">
+            <input
+              type="number"
+              class="form-control"
+              value="{{position2}}"
+              name="position2Number"
+              min="0"
+              max="360"
+              onchange="this.form.submit()"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="container theta3-container">
+        <div class="row">
+          <div class="col">
+            <h1 class="display-1 text">P3</h1>
+          </div>
+          <div class="col-8">
+            <input
+              type="range"
+              class="form-range position3 range-input"
+              id="position3"
+              min="0"
+              max="360"
+              oninput="rangeValuePosition3.innerText = this.value"
+              name="position3"
+              onchange="this.form.submit()"
+              value="{{position3}}"
+            />
+          </div>
+          <div class="col">
+            <h1
+              id="rangeValuePosition3"
+              class="display-1 text"
+            >{{position3}}</h1>
+          </div>
+          <div class="col">
+            <input
+              type="number"
+              class="form-control"
+              value="{{position3}}"
+              name="position3Number"
+              min="0"
+              max="360"
+              onchange="this.form.submit()"
+            />
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
 </body>
