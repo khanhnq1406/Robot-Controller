@@ -1,19 +1,43 @@
 #include <PID_v1.h>
-#define MotEnable 6             // Motor Enamble pin Runs on PWM signal
-#define MotFwd 7                // Motor Forward pin
-#define MotRev 8                // Motor Reverse pin
+#include "firebaseConnectEsp.h"
+#define MotEnable1 21             // Motor Enamble pin Runs on PWM signal
+#define MotFwd1 18                // Motor Forward pin
+#define MotRev1 19                // Motor Reverse pin
+
+#define MotEnable2 17             // Motor Enamble pin Runs on PWM signal
+#define MotFwd2 5                // Motor Forward pin
+#define MotRev2 4                // Motor Reverse pin
+
+#define MotEnable3 27             // Motor Enamble pin Runs on PWM signal
+#define MotFwd3 12                // Motor Forward pin
+#define MotRev3 14                // Motor Reverse pin
 String readString;              // This while store the user inputTheta1 data
 int User_Input = 0;             // This while convert inputTheta1 string into integer
-int encoderPin1 = 2;            // Encoder Output 'A' must connected with intreput pin of arduino.
-int encoderPin2 = 3;            // Encoder Otput 'B' must connected with intreput pin of arduino.
-volatile int lastEncoded = 0;   // Here updated value of encoder store.
-volatile long encoderValue = 0; // Raw encoder value
-int PPR = 1600;                 // Encoder Pulse per revolution.
-int angle = 360;                // Maximum degree of motion.
-int REV = 0;                    // Set point REQUIRED ENCODER VALUE
-int lastMSB = 0;
-int lastLSB = 0;
+int encoderPin1A = 32;            // Encoder Output 'A' must connected with intreput pin of arduino.
+int encoderPin1B = 33;            // Encoder Otput 'B' must connected with intreput pin of arduino.
+
+int encoderPin2A = 22;            // Encoder Output 'A' must connected with intreput pin of arduino.
+int encoderPin2B = 23;            // Encoder Otput 'B' must connected with intreput pin of arduino.
+
+int encoderPin3A = 25;            // Encoder Output 'A' must connected with intreput pin of arduino.
+int encoderPin3B = 26;            // Encoder Otput 'B' must connected with intreput pin of arduino.
+volatile int lastEncoded1 = 0;   // Here updated value of encoder store.
+volatile int lastEncoded2 = 0;   // Here updated value of encoder store.
+volatile int lastEncoded3 = 0;   // Here updated value of encoder store.
+
+volatile long encoderValue1 = 0; // Raw encoder value
+volatile long encoderValue2 = 0; // Raw encoder value
+volatile long encoderValue3 = 0; // Raw encoder value
+
+// int PPR = 1600;                 // Encoder Pulse per revolution.
+// int angle = 360;                // Maximum degree of motion.
+int REV_Theta1 = 0;                    // Set point REQUIRED ENCODER VALUE
+int REV_Theta2 = 0;                    // Set point REQUIRED ENCODER VALUE
+int REV_Theta3 = 0;                    // Set point REQUIRED ENCODER VALUE
+// int lastMSB = 0;
+// int lastLSB = 0;
 double kp = 3, ki = 0, kd = 0.1; // 5        // modify for optimal performance
+double kp3 = 3, ki3 = 0, kd3 = 0.1; // 5        // modify for optimal performance
 double inputTheta1 = 0, outputTheta1 = 0, setpointTheta1 = 0;
 double inputTheta2 = 0, outputTheta2 = 0, setpointTheta2 = 0;
 double inputTheta3 = 0, outputTheta3 = 0, setpointTheta3 = 0;
@@ -21,114 +45,329 @@ PID PidTheta1(&inputTheta1, &outputTheta1, &setpointTheta1, kp, ki, kd, DIRECT);
 PID PidTheta2(&inputTheta2, &outputTheta2, &setpointTheta2, kp, ki, kd, DIRECT);
 PID PidTheta3(&inputTheta3, &outputTheta3, &setpointTheta3, kp, ki, kd, DIRECT);
 
-unsigned long time;
+unsigned long timeMillis;
 void setup()
 {
-  pinMode(MotEnable, OUTPUT);
-  pinMode(MotFwd, OUTPUT);
-  pinMode(MotRev, OUTPUT);
   Serial.begin(9600); // initialize serial comunication
+  Serial.println("Setup Starting");
 
-  pinMode(encoderPin1, INPUT_PULLUP);
-  pinMode(encoderPin2, INPUT_PULLUP);
+  pinMode(MotEnable1, OUTPUT);
+  pinMode(MotFwd1, OUTPUT);
+  pinMode(MotRev1, OUTPUT);
 
-  digitalWrite(encoderPin1, HIGH); // turn pullup resistor on
-  digitalWrite(encoderPin2, HIGH); // turn pullup resistor on
+  pinMode(MotEnable2, OUTPUT);
+  pinMode(MotFwd2, OUTPUT);
+  pinMode(MotRev2, OUTPUT);
 
+  pinMode(MotEnable3, OUTPUT);
+  pinMode(MotFwd3, OUTPUT);
+  pinMode(MotRev3, OUTPUT);
+
+  pinMode(encoderPin1A, INPUT_PULLUP);
+  pinMode(encoderPin1B, INPUT_PULLUP);
+  
+  pinMode(encoderPin2A, INPUT_PULLUP);
+  pinMode(encoderPin2B, INPUT_PULLUP);
+
+  pinMode(encoderPin3A, INPUT_PULLUP);
+  pinMode(encoderPin3B, INPUT_PULLUP);
+
+  digitalWrite(encoderPin1A, HIGH); // turn pullup resistor on
+  digitalWrite(encoderPin1B, HIGH); // turn pullup resistor on
+
+  digitalWrite(encoderPin2A, HIGH); // turn pullup resistor on
+  digitalWrite(encoderPin2B, HIGH); // turn pullup resistor on
+
+  digitalWrite(encoderPin3A, HIGH); // turn pullup resistor on
+  digitalWrite(encoderPin3B, HIGH); // turn pullup resistor on
   // call updateEncoder() when any high/low changed seen
   // on interrupt 0 (pin 2), or interrupt 1 (pin 3)
-  attachInterrupt(0, updateEncoder, CHANGE);
-  attachInterrupt(1, updateEncoder, CHANGE);
+  attachInterrupt(encoderPin1A, updateEncoder1, CHANGE);
+  attachInterrupt(encoderPin1B, updateEncoder1, CHANGE);
 
-  TCCR1B = TCCR1B & 0b11111000 | 1; // set 31KHz PWM to prevent motor noise
+  attachInterrupt(encoderPin2A, updateEncoder2, CHANGE);
+  attachInterrupt(encoderPin2B, updateEncoder2, CHANGE);
+
+  attachInterrupt(encoderPin3A, updateEncoder3, CHANGE);
+  attachInterrupt(encoderPin3B, updateEncoder3, CHANGE);
+  // TCCR1B = TCCR1B & 0b11111000 | 1; // set 31KHz PWM to prevent motor noise
   PidTheta1.SetMode(AUTOMATIC);         // set PID in Auto mode
   PidTheta1.SetSampleTime(1);           // refresh rate of PID controller
-  PidTheta1.SetOutputLimits(-125, 125); // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
+  PidTheta1.SetOutputLimits(-255, 255); // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
 
   PidTheta2.SetMode(AUTOMATIC);         // set PID in Auto mode
   PidTheta2.SetSampleTime(1);           // refresh rate of PID controller
-  PidTheta2.SetOutputLimits(-125, 125); // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
+  PidTheta2.SetOutputLimits(-255, 255); // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
 
   PidTheta3.SetMode(AUTOMATIC);         // set PID in Auto mode
   PidTheta3.SetSampleTime(1);           // refresh rate of PID controller
-  PidTheta3.SetOutputLimits(-125, 125); // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
-  time = millis();
+  PidTheta3.SetOutputLimits(-255, 255); // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
+  
+  timeMillis = millis();
+
+  // Firebase
+  WiFi.begin (WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Dang ket noi");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+  }
+
+  Serial.println ("");
+  Serial.println ("Da ket noi WiFi!");
+  Serial.println(WiFi.localIP());
+
+  /* Assign the api key (required) */
+  config.api_key = API_KEY;
+ 
+  /* Assign the RTDB URL (required) */
+  config.database_url = DATABASE_URL;
+ 
+  /* Sign up */
+  if (Firebase.signUp(&config, &auth, "", "")){
+    Serial.println("ok");
+    signupOK = true;
+  }
+  else{
+    Serial.printf("%s\n", config.signer.signupError.message.c_str());
+  }
+ 
+  /* Assign the callback function for the long running token generation task */
+  // config.token_status_callback = tokenStatusCallback; //see addons/TokenHelper.h
+   
+  Firebase.begin(&config, &auth);
+  Firebase.reconnectWiFi(true);
+
+  delay(1000);
+  Serial.println("Setup Done");
 }
 
 void loop()
 {
+  // firebaseData();
+  // while (Serial.available())
+  // {                         // Check if the serial data is available.
+  //   delay(3);               // a small delay
+  //   char c = Serial.read(); // storing inputTheta1 data
+  //   readString += c;        // accumulate each of the characters in readString
+  // }
 
-  while (Serial.available())
-  {                         // Check if the serial data is available.
-    delay(3);               // a small delay
-    char c = Serial.read(); // storing inputTheta1 data
-    readString += c;        // accumulate each of the characters in readString
-  }
+  // if (readString.length() > 0)
+  // { // Verify that the variable contains information
 
-  if (readString.length() > 0)
-  { // Verify that the variable contains information
+  //   Serial.println(readString.toInt()); // printing the inputTheta1 data in integer form
+  //   User_Input = readString.toInt();    // here inputTheta1 data is store in integer form
+  // }
 
-    Serial.println(readString.toInt()); // printing the inputTheta1 data in integer form
-    User_Input = readString.toInt();    // here inputTheta1 data is store in integer form
-  }
-  REV = map(User_Input, 0, 360, 0, 2000); // mapping degree into pulse 130RPM: 2000, 247: 920
-  if ((unsigned long)(millis() - time) > 500)
+  String data_ ,mode_,val;
+  int moc;
+  int data;
+  if(Serial.available() > 0)
   {
-    Serial.print("this is REV - ");
-    Serial.println(REV); // printing REV value
-    Serial.print("encoderValue - ");
-    Serial.println(encoderValue);
-    time = millis();
+    val = Serial.readStringUntil('\n');
+    for (int i = 0; i < val.length(); i++) {
+    if (val.charAt(i) == ' ') {
+        moc = i; //Tìm vị trí của dấu ""
+      }
+    }
+    mode_=val;
+    data_=val;
+    mode_.remove(moc);
+    data_.remove(0,moc+1);
+    data=data_.toInt();
   }
-  setpointTheta1 = REV;       // PID while work to achive this value consider as SET value
-  inputTheta1 = encoderValue; // data from encoder consider as a Process value
+  if(mode_ == "t1")
+  {
+    theta1 = data;
+  }
+  if(mode_ == "t2")
+  {
+    theta2 = data;
+  }
+  if(mode_ == "t3")
+  {
+    theta3 = data;
+  }
 
+  REV_Theta1 = map(theta1, 0, 360, 0, 6000); // mapping degree into pulse 130RPM: 2000, 247: 920
+  REV_Theta2 = map(theta2, 0, 360, 0, 7500); // mapping degree into pulse 130RPM: 2000, 247: 920
+  REV_Theta3 = map(theta3, 0, 360, 0, 3450); // mapping degree into pulse 130RPM: 2000, 247: 920
+
+  if ((unsigned long)(millis() - timeMillis) > 500)
+  {
+    Serial.print("this is REV_Theta1 - ");
+    Serial.println(REV_Theta1); // printing REV_Theta1 value
+    Serial.print("encoderValue1 - ");
+    Serial.println(encoderValue1);
+
+    Serial.print("this is REV_Theta2 - ");
+    Serial.println(REV_Theta2); // printing REV_Theta2 value
+    Serial.print("encoderValue2 - ");
+    Serial.println(encoderValue2);
+
+    Serial.print("this is REV_Theta3 - ");
+    Serial.println(REV_Theta3); // printing REV_Theta3 value
+    Serial.print("encoderValue3 - ");
+    Serial.println(encoderValue3);
+    timeMillis = millis();
+  }
+
+  setpointTheta1 = REV_Theta1;       // PID while work to achive this value consider as SET value
+  inputTheta1 = encoderValue1; // data from encoder consider as a Process value
+
+  setpointTheta2 = REV_Theta2;       // PID while work to achive this value consider as SET value
+  inputTheta2 = encoderValue2; // data from encoder consider as a Process value
+
+  setpointTheta3 = REV_Theta3;       // PID while work to achive this value consider as SET value
+  inputTheta3 = encoderValue3; // data from encoder consider as a Process value
   PidTheta1.Compute(); // calculate new outputTheta1
-  pwmOut(outputTheta1);
+  PidTheta2.Compute(); // calculate new outputTheta1
+  PidTheta3.Compute(); // calculate new outputTheta1
+  pwmOut(outputTheta1, outputTheta2, outputTheta3);
 }
-void pwmOut(int out)
+void pwmOut(int out1, int out2, int out3)
 {
-  if (out > 0)
-  {                              // if REV > encoderValue motor move in forward direction.
-    analogWrite(MotEnable, out); // Enabling motor enable pin to reach the desire angle
-    forward();                   // calling motor to move forward
+  if (out1 > 0)
+  {                              // if REV_Theta1 > encoderValue1 motor move in forward direction.
+    analogWrite(MotEnable1, out1); // Enabling motor enable pin to reach the desire angle
+    forward1();                   // calling motor to move forward
   }
   else
   {
-    analogWrite(MotEnable, abs(out)); // if REV < encoderValue motor move in forward direction.
-    reverse();                        // calling motor to move reverse
+    analogWrite(MotEnable1, abs(out1)); // if REV_Theta1 < encoderValue1 motor move in forward direction.
+    reverse1();                        // calling motor to move reverse
   }
-  readString = ""; // Cleaning User inputTheta1, ready for new Input
+
+  if (out2 > 0)
+  {                              // if REV_Theta1 > encoderValue1 motor move in forward direction.
+    analogWrite(MotEnable2, out2); // Enabling motor enable pin to reach the desire angle
+    forward2();                   // calling motor to move forward
+  }
+  else
+  {
+    analogWrite(MotEnable2, abs(out2)); // if REV_Theta1 < encoderValue1 motor move in forward direction.
+    reverse2();                        // calling motor to move reverse
+  }
+
+  if (out3 > 0)
+  {                              // if REV_Theta1 > encoderValue1 motor move in forward direction.
+    analogWrite(MotEnable3, out3); // Enabling motor enable pin to reach the desire angle
+    forward3();                   // calling motor to move forward
+  }
+  else
+  {
+    analogWrite(MotEnable3, abs(out3)); // if REV_Theta1 < encoderValue1 motor move in forward direction.
+    reverse3();                        // calling motor to move reverse
+  }
+  readString = "";
+
 }
-void updateEncoder()
+void updateEncoder1()
 {
-  int MSB = digitalRead(encoderPin1); // MSB = most significant bit
-  int LSB = digitalRead(encoderPin2); // LSB = least significant bit
+  int MSB1 = digitalRead(encoderPin1A); // MSB1 = most significant bit
+  int LSB2 = digitalRead(encoderPin1B); // LSB2 = least significant bit
 
-  int encoded = (MSB << 1) | LSB;         // converting the 2 pin value to single number
-  int sum = (lastEncoded << 2) | encoded; // adding it to the previous encoded value
+  int encoded1 = (MSB1 << 1) | LSB2;         // converting the 2 pin value to single number
+  int sum1 = (lastEncoded1 << 2) | encoded1; // adding it to the previous encoded value
 
-  if (sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011)
-    encoderValue++;
-  if (sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000)
-    encoderValue--;
+  if (sum1 == 0b1101 || sum1 == 0b0100 || sum1 == 0b0010 || sum1 == 0b1011)
+    encoderValue1++;
+  if (sum1 == 0b1110 || sum1 == 0b0111 || sum1 == 0b0001 || sum1 == 0b1000)
+    encoderValue1--;
 
-  lastEncoded = encoded; // store this value for next time
+  lastEncoded1 = encoded1; // store this value for next timeMillis
 }
 
-void forward()
+void updateEncoder2()
 {
-  digitalWrite(MotFwd, HIGH);
-  digitalWrite(MotRev, LOW);
+  int MSB2 = digitalRead(encoderPin2A); // MSB2 = most significant bit
+  int LSB2 = digitalRead(encoderPin2B); // LSB2 = least significant bit
+
+  int encoded2 = (MSB2 << 1) | LSB2;         // converting the 2 pin value to single number
+  int sum2 = (lastEncoded2 << 2) | encoded2; // adding it to the previous encoded value
+
+  if (sum2 == 0b1101 || sum2 == 0b0100 || sum2 == 0b0010 || sum2 == 0b1011)
+    encoderValue2++;
+  if (sum2 == 0b1110 || sum2 == 0b0111 || sum2 == 0b0001 || sum2 == 0b1000)
+    encoderValue2--;
+
+  lastEncoded2 = encoded2; // store this value for next timeMillis
+  // readString = "";
+
 }
 
-void reverse()
+void updateEncoder3()
 {
-  digitalWrite(MotFwd, LOW);
-  digitalWrite(MotRev, HIGH);
+  int MSB3 = digitalRead(encoderPin3A); // MSB3 = most significant bit
+  int LSB3 = digitalRead(encoderPin3B); // LSB3 = least significant bit
+
+  int encoded3 = (MSB3 << 1) | LSB3;         // converting the 2 pin value to single number
+  int sum3 = (lastEncoded3 << 2) | encoded3; // adding it to the previous encoded value
+
+  if (sum3 == 0b1101 || sum3 == 0b0100 || sum3 == 0b0010 || sum3 == 0b1011)
+    encoderValue3++;
+  if (sum3 == 0b1110 || sum3 == 0b0111 || sum3 == 0b0001 || sum3 == 0b1000)
+    encoderValue3--;
+
+  lastEncoded3 = encoded3; // store this value for next timeMillis
+  if ((unsigned long)(millis() - timeMillis) > 500)
+  {
+    Serial.print("MSB3: ");
+    Serial.println(MSB3); 
+    Serial.print("LSB3: ");
+    Serial.println(LSB3); 
+  }
+  // readString = "";
+
 }
-void finish()
+
+void forward1()
 {
-  digitalWrite(MotFwd, LOW);
-  digitalWrite(MotRev, LOW);
+  digitalWrite(MotFwd1, HIGH);
+  digitalWrite(MotRev1, LOW);
+}
+
+void reverse1()
+{
+  digitalWrite(MotFwd1, LOW);
+  digitalWrite(MotRev1, HIGH);
+}
+void finish1()
+{
+  digitalWrite(MotFwd1, LOW);
+  digitalWrite(MotRev1, LOW);
+}
+
+void forward2()
+{
+  digitalWrite(MotFwd2, HIGH);
+  digitalWrite(MotRev2, LOW);
+}
+
+void reverse2()
+{
+  digitalWrite(MotFwd2, LOW);
+  digitalWrite(MotRev2, HIGH);
+}
+void finish2()
+{
+  digitalWrite(MotFwd2, LOW);
+  digitalWrite(MotRev2, LOW);
+}
+
+void forward3()
+{
+  digitalWrite(MotFwd3, HIGH);
+  digitalWrite(MotRev3, LOW);
+}
+
+void reverse3()
+{
+  digitalWrite(MotFwd3, LOW);
+  digitalWrite(MotRev3, HIGH);
+}
+void finish3()
+{
+  digitalWrite(MotFwd3, LOW);
+  digitalWrite(MotRev3, LOW);
 }
