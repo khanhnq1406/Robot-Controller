@@ -1,5 +1,6 @@
 #include <PID_v1.h>
-#include "firebaseConnectEsp.h"
+
+
 #define MotEnable1 21             // Motor Enamble pin Runs on PWM signal
 #define MotFwd1 18                // Motor Forward pin
 #define MotRev1 19                // Motor Reverse pin
@@ -9,9 +10,17 @@
 #define MotRev2 4                // Motor Reverse pin
 
 #define MotEnable3 27             // Motor Enamble pin Runs on PWM signal
-#define MotFwd3 12                // Motor Forward pin
-#define MotRev3 14                // Motor Reverse pin
+#define MotFwd3 14                // Motor Forward pin
+#define MotRev3 12                // Motor Reverse pin
+
+int MSB3;
+int LSB3;
+
 String readString;              // This while store the user inputTheta1 data
+
+int theta1, theta2, theta3;
+int theta1Update, theta2Update, theta3Update;
+
 int User_Input = 0;             // This while convert inputTheta1 string into integer
 int encoderPin1A = 32;            // Encoder Output 'A' must connected with intreput pin of arduino.
 int encoderPin1B = 33;            // Encoder Otput 'B' must connected with intreput pin of arduino.
@@ -19,7 +28,7 @@ int encoderPin1B = 33;            // Encoder Otput 'B' must connected with intre
 int encoderPin2A = 22;            // Encoder Output 'A' must connected with intreput pin of arduino.
 int encoderPin2B = 23;            // Encoder Otput 'B' must connected with intreput pin of arduino.
 
-int encoderPin3A = 25;            // Encoder Output 'A' must connected with intreput pin of arduino.
+int encoderPin3A = 13;            // Encoder Output 'A' must connected with intreput pin of arduino.
 int encoderPin3B = 26;            // Encoder Otput 'B' must connected with intreput pin of arduino.
 volatile int lastEncoded1 = 0;   // Here updated value of encoder store.
 volatile int lastEncoded2 = 0;   // Here updated value of encoder store.
@@ -46,6 +55,10 @@ PID PidTheta2(&inputTheta2, &outputTheta2, &setpointTheta2, kp, ki, kd, DIRECT);
 PID PidTheta3(&inputTheta3, &outputTheta3, &setpointTheta3, kp, ki, kd, DIRECT);
 
 unsigned long timeMillis;
+#include "serialInput.h"
+#include "display.h"
+#include "firebaseConnectEsp.h"
+
 void setup()
 {
   Serial.begin(9600); // initialize serial comunication
@@ -144,73 +157,13 @@ void setup()
 
 void loop()
 {
-  // firebaseData();
-  // while (Serial.available())
-  // {                         // Check if the serial data is available.
-  //   delay(3);               // a small delay
-  //   char c = Serial.read(); // storing inputTheta1 data
-  //   readString += c;        // accumulate each of the characters in readString
-  // }
-
-  // if (readString.length() > 0)
-  // { // Verify that the variable contains information
-
-  //   Serial.println(readString.toInt()); // printing the inputTheta1 data in integer form
-  //   User_Input = readString.toInt();    // here inputTheta1 data is store in integer form
-  // }
-
-  String data_ ,mode_,val;
-  int moc;
-  int data;
-  if(Serial.available() > 0)
-  {
-    val = Serial.readStringUntil('\n');
-    for (int i = 0; i < val.length(); i++) {
-    if (val.charAt(i) == ' ') {
-        moc = i; //Tìm vị trí của dấu ""
-      }
-    }
-    mode_=val;
-    data_=val;
-    mode_.remove(moc);
-    data_.remove(0,moc+1);
-    data=data_.toInt();
-  }
-  if(mode_ == "t1")
-  {
-    theta1 = data;
-  }
-  if(mode_ == "t2")
-  {
-    theta2 = data;
-  }
-  if(mode_ == "t3")
-  {
-    theta3 = data;
-  }
+  firebaseData();
+  display();
+  // serialInput();
 
   REV_Theta1 = map(theta1, 0, 360, 0, 6000); // mapping degree into pulse 130RPM: 2000, 247: 920
   REV_Theta2 = map(theta2, 0, 360, 0, 7500); // mapping degree into pulse 130RPM: 2000, 247: 920
   REV_Theta3 = map(theta3, 0, 360, 0, 3450); // mapping degree into pulse 130RPM: 2000, 247: 920
-
-  if ((unsigned long)(millis() - timeMillis) > 500)
-  {
-    Serial.print("this is REV_Theta1 - ");
-    Serial.println(REV_Theta1); // printing REV_Theta1 value
-    Serial.print("encoderValue1 - ");
-    Serial.println(encoderValue1);
-
-    Serial.print("this is REV_Theta2 - ");
-    Serial.println(REV_Theta2); // printing REV_Theta2 value
-    Serial.print("encoderValue2 - ");
-    Serial.println(encoderValue2);
-
-    Serial.print("this is REV_Theta3 - ");
-    Serial.println(REV_Theta3); // printing REV_Theta3 value
-    Serial.print("encoderValue3 - ");
-    Serial.println(encoderValue3);
-    timeMillis = millis();
-  }
 
   setpointTheta1 = REV_Theta1;       // PID while work to achive this value consider as SET value
   inputTheta1 = encoderValue1; // data from encoder consider as a Process value
@@ -298,8 +251,8 @@ void updateEncoder2()
 
 void updateEncoder3()
 {
-  int MSB3 = digitalRead(encoderPin3A); // MSB3 = most significant bit
-  int LSB3 = digitalRead(encoderPin3B); // LSB3 = least significant bit
+  MSB3 = digitalRead(encoderPin3A); // MSB3 = most significant bit
+  LSB3 = digitalRead(encoderPin3B); // LSB3 = least significant bit
 
   int encoded3 = (MSB3 << 1) | LSB3;         // converting the 2 pin value to single number
   int sum3 = (lastEncoded3 << 2) | encoded3; // adding it to the previous encoded value
@@ -310,13 +263,7 @@ void updateEncoder3()
     encoderValue3--;
 
   lastEncoded3 = encoded3; // store this value for next timeMillis
-  if ((unsigned long)(millis() - timeMillis) > 500)
-  {
-    Serial.print("MSB3: ");
-    Serial.println(MSB3); 
-    Serial.print("LSB3: ");
-    Serial.println(LSB3); 
-  }
+  
   // readString = "";
 
 }
