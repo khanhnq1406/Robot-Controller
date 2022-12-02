@@ -40,7 +40,7 @@ void firebaseData()
     if (Firebase.RTDB.getInt(&fbdo, "/Theta/theta2")) {
         theta2Update = fbdo.intData();
         if (theta2 != theta2Update)
-          theta2 = theta1Update;
+          theta2 = theta2Update;
     }
     else {
       Serial.println(fbdo.errorReason());
