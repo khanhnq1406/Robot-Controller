@@ -8,17 +8,17 @@ const int led2 = 4;
 #include "soc/timer_group_struct.h"
 #include "soc/timer_group_reg.h"
 
-#define MotEnable1 21             // Motor Enamble pin Runs on PWM signal
-#define MotFwd1 18                // Motor Forward pin
-#define MotRev1 19                // Motor Reverse pin
+#define MotEnable2 21             // Motor Enamble pin Runs on PWM signal
+#define MotFwd2 18                // Motor Forward pin
+#define MotRev2 19                // Motor Reverse pin
 
-#define MotEnable2 17             // Motor Enamble pin Runs on PWM signal
-#define MotFwd2 5                // Motor Forward pin
-#define MotRev2 4                // Motor Reverse pin
+#define MotEnable3 17             // Motor Enamble pin Runs on PWM signal
+#define MotFwd3 4                // Motor Forward pin
+#define MotRev3 5                // Motor Reverse pin
 
-#define MotEnable3 27             // Motor Enamble pin Runs on PWM signal
-#define MotFwd3 14                // Motor Forward pin
-#define MotRev3 12                // Motor Reverse pin
+#define MotEnable1 27             // Motor Enamble pin Runs on PWM signal
+#define MotFwd1 14                // Motor Forward pin
+#define MotRev1 12                // Motor Reverse pin
 
 int MSB3;
 int LSB3;
@@ -29,14 +29,14 @@ int theta1, theta2, theta3;
 int theta1Update, theta2Update, theta3Update;
 
 int User_Input = 0;             // This while convert inputTheta1 string into integer
-int encoderPin1A = 32;            // Encoder Output 'A' must connected with intreput pin of arduino.
-int encoderPin1B = 33;            // Encoder Otput 'B' must connected with intreput pin of arduino.
+int encoderPin2A = 32;            // Encoder Output 'A' must connected with intreput pin of arduino.
+int encoderPin2B = 33;            // Encoder Otput 'B' must connected with intreput pin of arduino.
 
-int encoderPin2A = 22;            // Encoder Output 'A' must connected with intreput pin of arduino.
-int encoderPin2B = 23;            // Encoder Otput 'B' must connected with intreput pin of arduino.
+int encoderPin3A = 22;            // Encoder Output 'A' must connected with intreput pin of arduino.
+int encoderPin3B = 23;            // Encoder Otput 'B' must connected with intreput pin of arduino.
 
-int encoderPin3A = 13;            // Encoder Output 'A' must connected with intreput pin of arduino.
-int encoderPin3B = 26;            // Encoder Otput 'B' must connected with intreput pin of arduino.
+int encoderPin1A = 26;            // Encoder Output 'A' must connected with intreput pin of arduino.
+int encoderPin1B = 13;            // Encoder Otput 'B' must connected with intreput pin of arduino.
 volatile int lastEncoded1 = 0;   // Here updated value of encoder store.
 volatile int lastEncoded2 = 0;   // Here updated value of encoder store.
 volatile int lastEncoded3 = 0;   // Here updated value of encoder store.
