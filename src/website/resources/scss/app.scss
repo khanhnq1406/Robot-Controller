@@ -1,6 +1,41 @@
 .home {
   background: linear-gradient(120deg, #2980b9, #8e44ad);
 }
+
+.container {
+  position: relative;
+}
+.container img {
+  // position: relative;
+  // width: 1280px;
+  // height: 720px;
+  // width: 100%;
+  // height: 100%;
+  // object-fit: cover; /* Do not scale the image */
+  // object-position: center; /* Center the image within the element */
+  width: 100%;
+  height: auto;
+}
+.home-body {
+  background: #0a164d;
+}
+.container .btn-start {
+  // position: relative;
+  // top: 50px;
+  color: transparent;
+  background-color: transparent;
+  border-color: transparent;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  font-size: 16px;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
 .text {
   color: azure;
   font-size: 30px;
