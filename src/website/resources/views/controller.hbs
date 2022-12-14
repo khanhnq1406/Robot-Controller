@@ -1,6 +1,6 @@
 <body class="home">
-  <div class="theta-div">
-    <form action="" method="POST">
+  <form action="" method="POST">
+    <div class="theta-div">
       <div class="container theta1-container">
         <div class="row">
           <div class="col">
@@ -30,8 +30,6 @@
               name="theta1Number"
               min="0"
               max="360"
-              step="5"
-              onchange="this.form.submit()"
             />
           </div>
         </div>
@@ -50,8 +48,8 @@
               min="0"
               max="360"
               oninput="rangeValueTheta2.innerText = this.value"
-              name="theta2"
               onchange="this.form.submit()"
+              name="theta2"
               value="{{theta2}}"
             />
           </div>
@@ -66,8 +64,6 @@
               name="theta2Number"
               min="0"
               max="360"
-              step="5"
-              onchange="this.form.submit()"
             />
           </div>
         </div>
@@ -102,13 +98,14 @@
               name="theta3Number"
               min="0"
               max="360"
-              step="5"
-              onchange="this.form.submit()"
             />
           </div>
         </div>
       </div>
+    <button type="submit" class="btn btn-warning btn-submit">Send Rotation</button>
   </div>
+  </form>
+  <form action="" method="POST">
   <div class="position-div">
       <div class="container theta1-container">
         <div class="row">
@@ -142,7 +139,6 @@
               name="position1Number"
               min="0"
               max="360"
-              onchange="this.form.submit()"
             />
           </div>
         </div>
@@ -180,7 +176,6 @@
               name="position2Number"
               min="0"
               max="360"
-              onchange="this.form.submit()"
             />
           </div>
         </div>
@@ -218,11 +213,20 @@
               name="position3Number"
               min="0"
               max="360"
-              onchange="this.form.submit()"
             />
           </div>
         </div>
       </div>
+      <button type="submit" class="btn btn-warning btn-submit">Send Position</button>
+    </form>
+  </div>
+  <div class="actuator">
+    <form action="" method="POST">
+        {{#if actuator}}
+          <button type="submit" class="btn btn-dark btn-actuator" value=true name="actuator">Hold</button>
+        {{else}}
+          <button type="submit" class="btn btn-dark btn-actuator" value=false name="actuator">Release</button>
+        {{/if}}
     </form>
   </div>
 </body>

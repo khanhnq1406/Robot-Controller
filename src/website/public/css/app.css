@@ -52,3 +52,16 @@
 .position-div {
   position: relative;
   top: 170px; }
+
+.btn-submit {
+  position: relative;
+  top: 190px;
+  width: 300px;
+  left: 76%; }
+
+.actuator {
+  position: relative;
+  top: 300px; }
+
+.btn-actuator {
+  width: 300px; }
