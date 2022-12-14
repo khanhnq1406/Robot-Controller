@@ -34,16 +34,14 @@ void firebaseData()
 {
   String sendMsg;
   char sendMsgChar[50] = "";
-  if ((millis() - millisRecv > 1 || millisRecv == 0)) {
+  if ((millis() - millisRecv > 100 || millisRecv == 0)) {
     millisRecv = millis();
     if (Firebase.RTDB.getFloat(&fbdo, "/Theta/theta1")) {
         theta1Update = fbdo.floatData();
         if (theta1 != theta1Update) {
-          Serial.println("Line 1");
           theta1 = theta1Update;
-          forwardKinematic();
-          updateData();
-          Serial.println("Line 2");
+          // forwardKinematic();
+          // updateData();
         }
     }
     else {
@@ -54,8 +52,8 @@ void firebaseData()
         theta2Update = fbdo.floatData();
         if (theta2 != theta2Update) {
           theta2 = theta2Update;
-          forwardKinematic();
-          updateData();
+          // forwardKinematic();
+          // updateData();
         }
     }
     else {
@@ -66,8 +64,8 @@ void firebaseData()
         theta3Update = fbdo.floatData();
         if (theta3 != theta3Update) {
           theta3 = theta3Update;
-          forwardKinematic();
-          updateData();
+          // forwardKinematic();
+          // updateData();
         }
     }
     else {
@@ -79,6 +77,7 @@ void firebaseData()
         if (Px != PxUpdate) {
           Px = PxUpdate;
           // inverseKinematic();
+          // updateData();
         }
     }
     else {
@@ -90,6 +89,7 @@ void firebaseData()
         if (Py != PyUpdate) {
           Py = PyUpdate;
           // inverseKinematic();
+          // updateData();
         }
     }
     else {
@@ -101,6 +101,7 @@ void firebaseData()
         if (Pz != PzUpdate) {
           Pz = PzUpdate;
           // inverseKinematic();
+          // updateData();
         }
     }
     else {

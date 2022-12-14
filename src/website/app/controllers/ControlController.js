@@ -30,7 +30,7 @@ class HomeController {
     console.log("Actuator: ", actuator);
     var database = firebase.database();
     let thetaRef = database.ref("Theta");
-
+    // When load new page
     if (
       theta1 === undefined &&
       theta2 === undefined &&
@@ -57,10 +57,13 @@ class HomeController {
           position1,
           position2,
           position3,
+          0,
           actuator
         );
       });
-    } else if (
+    }
+    // When change theta
+    else if (
       theta1 !== undefined &&
       theta2 !== undefined &&
       theta3 !== undefined &&
@@ -70,12 +73,22 @@ class HomeController {
     ) {
       thetaRef.once("value", (snapshot) => {
         const data = snapshot.val();
-        if (theta1 !== theta1Number && Number(theta1) === data.theta1)
+        if (
+          Number(theta1) !== Number(theta1Number) &&
+          Number(theta1) === Number(data.theta1)
+        )
           theta1 = theta1Number;
-        if (theta2 !== theta2Number && Number(theta2) === data.theta2)
+        if (
+          Number(theta2) !== Number(theta2Number) &&
+          Number(theta2) === Number(data.theta2)
+        )
           theta2 = theta2Number;
-        if (theta3 !== theta3Number && Number(theta3) === data.theta3)
+        if (
+          Number(theta3) !== Number(theta3Number) &&
+          Number(theta3) === Number(data.theta3)
+        )
           theta3 = theta3Number;
+
         writeData(
           theta1,
           theta2,
@@ -84,11 +97,13 @@ class HomeController {
           data.position1,
           data.position2,
           data.position3,
+          1,
           data.actuator
-        ),
-          5000;
+        );
       });
-    } else if (
+    }
+    // When change position
+    else if (
       theta1 === undefined &&
       theta2 === undefined &&
       theta3 === undefined &&
@@ -99,20 +114,21 @@ class HomeController {
       thetaRef.once("value", (snapshot) => {
         const data = snapshot.val();
         if (
-          position1 !== position1Number &&
-          Number(position1) === data.position1
+          Number(position1) !== Number(position1Number) &&
+          Number(position1) === Number(data.position1)
         )
           position1 = position1Number;
         if (
-          position2 !== position2Number &&
-          Number(position2) === data.position2
+          Number(position2) !== Number(position2Number) &&
+          Number(position2) === Number(data.position2)
         )
           position2 = position2Number;
         if (
-          position3 !== position3Number &&
-          Number(position3) === data.position3
+          Number(position3) !== Number(position3Number) &&
+          Number(position3) === Number(data.position3)
         )
           position3 = position3Number;
+
         writeData(
           data.theta1,
           data.theta2,
@@ -121,10 +137,13 @@ class HomeController {
           position1,
           position2,
           position3,
+          2,
           data.actuator
         );
       });
-    } else if (actuator !== undefined) {
+    }
+    // When change actuator
+    else if (actuator !== undefined) {
       thetaRef.once("value", (snapshot) => {
         const data = snapshot.val();
         if (data.actuator === false) actuator = true;
@@ -137,6 +156,7 @@ class HomeController {
           data.position1,
           data.position2,
           data.position3,
+          0,
           actuator
         );
       });
@@ -172,6 +192,7 @@ class HomeController {
           position1,
           position2,
           position3,
+          0,
           actuator
         );
       });
@@ -184,26 +205,100 @@ class HomeController {
       position1,
       position2,
       position3,
+      isForward,
       actuator
     ) {
-      thetaRef.set({
-        theta1: Number(theta1),
-        theta2: Number(theta2),
-        theta3: Number(theta3),
-        position1: Number(position1),
-        position2: Number(position2),
-        position3: Number(position3),
-        actuator: actuator,
-      });
-      res.render("controller", {
-        theta1: theta1,
-        theta2: theta2,
-        theta3: theta3,
-        position1: position1,
-        position2: position2,
-        position3: position3,
-        actuator: actuator,
-      });
+      if (isForward === 1) {
+        let L1 = 114.55,
+          L2 = 162,
+          L3 = 130,
+          d1 = 164.54,
+          d2 = 69.5,
+          d3 = 16;
+        let theta1R = (theta1 * 3.14159) / 180;
+        let theta2R = (theta2 * 3.14159) / 180;
+        let theta3R = (theta3 * 3.14159) / 180;
+        let Px =
+          L1 -
+          L3 *
+            (Math.cos(theta1R) * Math.sin(theta2R) * Math.sin(theta3R) -
+              Math.cos(theta1R) * Math.cos(theta2R * Math.cos(theta3R))) +
+          L2 * Math.cos(theta1R) * Math.cos(theta2R);
+        let Py =
+          Math.sin(theta1R) *
+          (L3 * Math.cos(theta2R + theta3R) + L2 * Math.cos(theta2R));
+        let Pz = d1 + L3 * Math.sin(theta2R + theta3R) + L2 * Math.sin(theta2R);
+        position1 = Px.toFixed(2);
+        position2 = Py.toFixed(2);
+        position3 = Pz.toFixed(2);
+      } else if (isForward === 2) {
+        let L1 = 114.55,
+          L2 = 162,
+          L3 = 130,
+          d1 = 164.54,
+          d2 = 69.5,
+          d3 = 16;
+        let theta1Cal =
+          Math.atan2(position2, position1 - L1) * (180 / 3.141592);
+        const nx =
+          position1 * Math.cos((theta1Cal * 3.14159) / 180) +
+          position2 * Math.sin((theta1Cal * 3.14159) / 180) -
+          L1 * Math.cos((theta1Cal * 3.14159) / 180);
+        const ny = position3 - d1;
+        const c3 =
+          (Math.pow(nx, 2) +
+            Math.pow(ny, 2) -
+            Math.pow(L3, 2) -
+            Math.pow(L2, 2)) /
+          (2 * L3 * L2);
+        const s3 = Math.sqrt(1 - Math.pow(c3, 2));
+        let theta3Cal = Math.atan2(s3, c3) * (180 / 3.141592);
+        const c2 =
+          (nx * (L3 * c3 + L2) + L3 * s3 * ny) /
+          (Math.pow(L3 * c3 + L2, 2) + Math.pow(L3, 2) * Math.pow(s3, 2));
+        const s2 =
+          (ny * (L3 * c3 + L2) - L3 * s3 * nx) /
+          (Math.pow(L3 * c3 + L2, 2) + Math.pow(L3, 2) * Math.pow(s3, 2));
+        let theta2Cal = Math.atan2(s2, c2) * (180 / 3.141592);
+        theta1 = theta1Cal.toFixed(2);
+        theta2 = theta2Cal.toFixed(2);
+        theta3 = theta3Cal.toFixed(2);
+      }
+      try {
+        thetaRef.set({
+          theta1: Number(theta1),
+          theta2: Number(theta2),
+          theta3: Number(theta3),
+          position1: Number(position1),
+          position2: Number(position2),
+          position3: Number(position3),
+          actuator: actuator,
+        });
+        res.render("controller", {
+          theta1: theta1,
+          theta2: theta2,
+          theta3: theta3,
+          position1: position1,
+          position2: position2,
+          position3: position3,
+          isWrongPosition: false,
+          actuator: actuator,
+        });
+      } catch {
+        thetaRef.once("value", (snapshot) => {
+          const data = snapshot.val();
+          res.render("controller", {
+            theta1: data.theta1,
+            theta2: data.theta2,
+            theta3: data.theta3,
+            position1: data.position1,
+            position2: data.position2,
+            position3: data.position3,
+            isWrongPosition: true,
+            actuator: data.actuator,
+          });
+        });
+      }
     }
   }
 
