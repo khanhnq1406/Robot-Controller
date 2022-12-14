@@ -1,6 +1,6 @@
 void display() {
 
-  if ((unsigned long)(millis() - timeMillis) > 500)
+  if ((unsigned long)(millis() - timeMillis) > 100)
   {
     Serial.print("Theta 1: ");
     Serial.println(theta1);
@@ -30,10 +30,22 @@ void display() {
     Serial.print("encoderValue3 - ");
     Serial.println(encoderValue3);
 
-    Serial.print("MSB3: ");
-    Serial.println(MSB3);
-    Serial.print("LSB3: ");
-    Serial.println(LSB3);
+    // Serial.print("MSB3: ");
+    // Serial.println(MSB3);
+    // Serial.print("LSB3: ");
+    // Serial.println(LSB3);
+    Serial.print("Px: ");
+    Serial.println(Px);
+    Serial.print("Py: ");
+    Serial.println(Py);
+    Serial.print("Pz: ");
+    Serial.println(Pz);
+    Serial.print("Px Update: ");
+    Serial.println(PxUpdate);
+    Serial.print("Py Update: ");
+    Serial.println(PyUpdate);
+    Serial.print("Pz Update: ");
+    Serial.println(PzUpdate);    
     timeMillis = millis();
   }
 

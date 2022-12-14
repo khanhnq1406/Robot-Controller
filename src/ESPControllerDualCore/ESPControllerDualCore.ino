@@ -25,8 +25,12 @@ int LSB3;
 
 String readString;              // This while store the user inputTheta1 data
 
-int theta1, theta2, theta3;
-int theta1Update, theta2Update, theta3Update;
+float theta1, theta2, theta3;
+float theta1Update, theta2Update, theta3Update;
+float Px, Py, Pz;
+float PxUpdate, PyUpdate, PzUpdate;
+
+float L1 = 114.55, L2 = 162, L3 = 130, d1 = 164.54, d2 = 69.5, d3 = 16;
 
 int User_Input = 0;             // This while convert inputTheta1 string into integer
 int encoderPin2A = 32;            // Encoder Output 'A' must connected with intreput pin of arduino.
@@ -64,6 +68,7 @@ PID PidTheta3(&inputTheta3, &outputTheta3, &setpointTheta3, kp, ki, kd, DIRECT);
 unsigned long timeMillis;
 #include "serialInput.h"
 #include "display.h"
+#include "kinematics.h"
 #include "firebaseConnectEsp.h"
 void setup() {
   Serial.begin(115200); 
@@ -219,6 +224,7 @@ void Task2code( void * pvParameters ){
     TIMERG0.wdt_wprotect=0;
     display();
     firebaseData();
+    // forwardKinematic();
   }
 }
 

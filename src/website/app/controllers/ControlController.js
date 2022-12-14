@@ -30,6 +30,7 @@ class HomeController {
     console.log("Actuator: ", actuator);
     var database = firebase.database();
     let thetaRef = database.ref("Theta");
+
     if (
       theta1 === undefined &&
       theta2 === undefined &&
@@ -84,7 +85,8 @@ class HomeController {
           data.position2,
           data.position3,
           data.actuator
-        );
+        ),
+          5000;
       });
     } else if (
       theta1 === undefined &&
