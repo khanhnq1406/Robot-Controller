@@ -222,7 +222,7 @@ class HomeController {
           L1 -
           L3 *
             (Math.cos(theta1R) * Math.sin(theta2R) * Math.sin(theta3R) -
-              Math.cos(theta1R) * Math.cos(theta2R * Math.cos(theta3R))) +
+              Math.cos(theta1R) * Math.cos(theta2R) * Math.cos(theta3R)) +
           L2 * Math.cos(theta1R) * Math.cos(theta2R);
         let Py =
           Math.sin(theta1R) *
@@ -315,6 +315,46 @@ class HomeController {
       actuator: Number(0),
     });
     res.send("Add successfully");
+  }
+
+  savePosition(req, res, next) {
+    var database = firebase.database();
+    let thetaRef = database.ref("Theta");
+    let positionRef = database.ref("PositionSaved");
+    let positionSaved = req.query.save;
+    thetaRef.once("value", (snapshot) => {
+      const data = snapshot.val();
+      positionRef.child(positionSaved).set({
+        theta1: data.theta1,
+        theta2: data.theta2,
+        theta3: data.theta3,
+        position1: data.position1,
+        position2: data.position2,
+        position3: data.position3,
+        actuator: data.actuator,
+      });
+    });
+    res.redirect("/controller");
+  }
+
+  goPosition(req, res, next) {
+    var database = firebase.database();
+    let thetaRef = database.ref("Theta");
+    let positionRef = database.ref("PositionSaved");
+    let positionSaved = req.query.go;
+    positionRef.child(positionSaved).once("value", (snapshot) => {
+      const data = snapshot.val();
+      thetaRef.set({
+        theta1: data.theta1,
+        theta2: data.theta2,
+        theta3: data.theta3,
+        position1: data.position1,
+        position2: data.position2,
+        position3: data.position3,
+        actuator: data.actuator,
+      });
+    });
+    res.redirect("/controller");
   }
 }
 module.exports = new HomeController();

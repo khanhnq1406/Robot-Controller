@@ -73,10 +73,21 @@ T_23 =  [cos(t3), -sin(t3),     0,      L2;
             0,  0,  0,  1];
              
 T_n=inv(T_01)*T;
-T_nx=simplify(T_n(1,4))
-T_ny=simplify(T_n(2,4))
-T_nz=simplify(T_n(3,4))
+T_n1=simplify(T_n(1,4))
+T_n2=simplify(T_n(2,4))
+T_n3=simplify(T_n(3,4))
 T_m=T_12*T_23*T_34;
-T_mx=simplify(T_m(1,4))
-T_my=simplify(T_m(2,4))
-T_mz=simplify(T_m(3,4))
+T_m1=simplify(T_m(1,4))
+T_m2=simplify(T_m(2,4))
+T_m3=simplify(T_m(3,4))
+
+% In calculating inverse kinematic
+syms t23 nx2 ny2 c2 nx ny nz
+nx2 = expand((L3*cos(t23)+L2*cos(t2))^2)
+ny2 = expand((L3*sin(t23)+L2*sin(t2))^2)
+simplify(nx2+ny2)
+
+expand(cos(t2+t3))
+expand(sin(t2+t3))
+
+c2 = simplify((nx+(ny-L3*cos(t2)*sin(t3))/(L3*cos(t3)+L2)*sin(t3))/(L3*cos(t3)+L2))

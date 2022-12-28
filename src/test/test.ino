@@ -13,36 +13,30 @@ const int led2 = 4;
 #define MotRev2 19                // Motor Reverse pin
 
 #define MotEnable3 17             // Motor Enamble pin Runs on PWM signal
-#define MotFwd3 5                // Motor Forward pin
-#define MotRev3 4                // Motor Reverse pin
+#define MotFwd3 4                // Motor Forward pin
+#define MotRev3 5                // Motor Reverse pin
 
 #define MotEnable1 27             // Motor Enamble pin Runs on PWM signal
 #define MotFwd1 12                // Motor Forward pin
 #define MotRev1 14                // Motor Reverse pin
-
-int encoderPin2A = 32;            // Encoder Output 'A' must connected with intreput pin of arduino.
-int encoderPin2B = 33;            // Encoder Otput 'B' must connected with intreput pin of arduino.
-
-int encoderPin3A = 23;            // Encoder Output 'A' must connected with intreput pin of arduino.
-int encoderPin3B = 22;            // Encoder Otput 'B' must connected with intreput pin of arduino.
-
-int encoderPin1A = 26;            // Encoder Output 'A' must connected with intreput pin of arduino.
-int encoderPin1B = 13;            // Encoder Otput 'B' must connected with intreput pin of arduino.
 
 int MSB3;
 int LSB3;
 
 String readString;              // This while store the user inputTheta1 data
 
-float theta1, theta2, theta3;
-float theta1Update, theta2Update, theta3Update;
-float Px, Py, Pz;
-float PxUpdate, PyUpdate, PzUpdate;
-
-float L1 = 114.55, L2 = 162, L3 = 130, d1 = 164.54, d2 = 69.5, d3 = 16;
+int theta1, theta2, theta3;
+int theta1Update, theta2Update, theta3Update;
 
 int User_Input = 0;             // This while convert inputTheta1 string into integer
+int encoderPin2A = 32;            // Encoder Output 'A' must connected with intreput pin of arduino.
+int encoderPin2B = 33;            // Encoder Otput 'B' must connected with intreput pin of arduino.
 
+int encoderPin3A = 22;            // Encoder Output 'A' must connected with intreput pin of arduino.
+int encoderPin3B = 23;            // Encoder Otput 'B' must connected with intreput pin of arduino.
+
+int encoderPin1A = 26;            // Encoder Output 'A' must connected with intreput pin of arduino.
+int encoderPin1B = 13;            // Encoder Otput 'B' must connected with intreput pin of arduino.
 volatile int lastEncoded1 = 0;   // Here updated value of encoder store.
 volatile int lastEncoded2 = 0;   // Here updated value of encoder store.
 volatile int lastEncoded3 = 0;   // Here updated value of encoder store.
@@ -58,11 +52,8 @@ int REV_Theta2 = 0;                    // Set point REQUIRED ENCODER VALUE
 int REV_Theta3 = 0;                    // Set point REQUIRED ENCODER VALUE
 // int lastMSB = 0;
 // int lastLSB = 0;
-// OK PID
 double kp = 3, ki = 0, kd = 0.1; // 5        // modify for optimal performance
 double kp3 = 3, ki3 = 0, kd3 = 0.1; // 5        // modify for optimal performance
-
-
 double inputTheta1 = 0, outputTheta1 = 0, setpointTheta1 = 0;
 double inputTheta2 = 0, outputTheta2 = 0, setpointTheta2 = 0;
 double inputTheta3 = 0, outputTheta3 = 0, setpointTheta3 = 0;
@@ -73,7 +64,6 @@ PID PidTheta3(&inputTheta3, &outputTheta3, &setpointTheta3, kp, ki, kd, DIRECT);
 unsigned long timeMillis;
 #include "serialInput.h"
 #include "display.h"
-#include "kinematics.h"
 #include "firebaseConnectEsp.h"
 void setup() {
   Serial.begin(115200); 
@@ -228,9 +218,9 @@ void Task2code( void * pvParameters ){
     TIMERG0.wdt_feed=1;
     TIMERG0.wdt_wprotect=0;
     display();
-    firebaseData();
-    serialInput();
-    // forwardKinematic();
+    // firebaseData();
+        serialInput();
+
   }
 }
 

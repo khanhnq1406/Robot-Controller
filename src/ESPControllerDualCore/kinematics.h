@@ -4,13 +4,13 @@ void forwardKinematic() {
   theta1R = theta1 * 3.14159/180;
   theta2R = theta2 * 3.14159/180;
   theta3R = theta3 * 3.14159/180;
-  Px = L1 - L3 * (cos(theta1R) * sin(theta2R) * sin(theta3R) - cos(theta1R)*cos(theta2R*cos(theta3R))) + L2 * cos(theta1R)*cos(theta2R);
+  Px = L1 - L3 * (cos(theta1R) * sin(theta2R) * sin(theta3R) - cos(theta1R)*cos(theta2R)*cos(theta3R)) + L2 * cos(theta1R)*cos(theta2R);
   Py = sin(theta1R)*(L3*cos(theta2R+theta3R)+L2*cos(theta2R));
   Pz = d1 + L3*sin(theta2R + theta3R) + L2*sin(theta2R);
+  
   // PxUpdate = Px;
   // PyUpdate = Py;
   // PzUpdate = Pz;
-
 }
 
 void inverseKinematic() {
@@ -23,6 +23,7 @@ void inverseKinematic() {
   float c2 =  (nx*(L3*c3+L2)+L3*s3*ny)/(pow((L3*c3+L2),2)+pow(L3,2)*pow(s3,2));
   float s2 = (ny*(L3*c3+L2)-L3*s3*nx)/(pow((L3*c3+L2),2)+pow(L3,2)*pow(s3,2));
   theta2 = atan2(s2,c2) * (180 / 3.141592);
+  
   // theta1Update = theta1;
   // theta2Update = theta2;
   // theta3Update = theta3;

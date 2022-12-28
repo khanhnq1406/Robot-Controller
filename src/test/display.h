@@ -34,27 +34,7 @@ void display() {
     // Serial.println(MSB3);
     // Serial.print("LSB3: ");
     // Serial.println(LSB3);
-    Serial.print("Px: ");
-    Serial.println(Px);
-    Serial.print("Py: ");
-    Serial.println(Py);
-    Serial.print("Pz: ");
-    Serial.println(Pz);
-    Serial.print("Px Update: ");
-    Serial.println(PxUpdate);
-    Serial.print("Py Update: ");
-    Serial.println(PyUpdate);
-    Serial.print("Pz Update: ");
-    Serial.println(PzUpdate);    
-    
-    Serial.print("Kp: ");
-    Serial.println(kp);    
-    Serial.print("Ki: ");
-    Serial.println(ki);    
-    Serial.print("Kd: ");
-    Serial.println(kd);    
-    Serial.println("--------------------------------------------------");    
-
+ 
     timeMillis = millis();
   }
 

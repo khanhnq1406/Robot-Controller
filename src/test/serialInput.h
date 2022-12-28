@@ -15,7 +15,7 @@ void serialInput() {
 
   String data_ ,mode_,val;
   int moc;
-  float data;
+  int data;
   if(Serial.available() > 0)
   {
     val = Serial.readStringUntil('\n');
@@ -28,7 +28,7 @@ void serialInput() {
     data_=val;
     mode_.remove(moc);
     data_.remove(0,moc+1);
-    data=data_.toFloat();
+    data=data_.toInt();
   }
   if(mode_ == "t1")
   {
@@ -42,16 +42,5 @@ void serialInput() {
   {
     theta3 = data;
   }
-  if(mode_ == "p")
-  {
-    kp = data;
-  }
-  if(mode_ == "i")
-  {
-    ki = data;
-  }
-  if(mode_ == "d")
-  {
-    kd = data;
-  }
+
 }
