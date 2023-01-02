@@ -107,5 +107,16 @@ void firebaseData()
     else {
       Serial.println(fbdo.errorReason());
     }
+
+    if (Firebase.RTDB.getBool(&fbdo, "/Theta/goHome")) {
+        isRestart = fbdo.boolData();
+    }
+    else {
+      Serial.println(fbdo.errorReason());
+    }
   }
+}
+
+void initData() {
+  Firebase.RTDB.setBool (&fbdo,"/Theta/goHome", false);
 }

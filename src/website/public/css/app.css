@@ -81,3 +81,10 @@
 
 .btn-go-position {
   width: 100px; }
+
+.go-home {
+  position: relative;
+  top: -220px; }
+
+.btn-go-home {
+  width: 300px; }

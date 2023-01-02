@@ -2,18 +2,18 @@ void display() {
 
   if ((unsigned long)(millis() - timeMillis) > 100)
   {
-    Serial.print("Theta 1: ");
-    Serial.println(theta1);
-    Serial.print("Theta 2: ");
-    Serial.println(theta2);
-    Serial.print("Theta 3: ");
-    Serial.println(theta3);
-    Serial.print("Theta 1 update: ");
-    Serial.println(theta1Update);
-    Serial.print("Theta 2 update : ");
-    Serial.println(theta2Update);
-    Serial.print("Theta 3 update: ");
-    Serial.println(theta3Update);
+    // Serial.print("Theta 1: ");
+    // Serial.println(theta1);
+    // Serial.print("Theta 2: ");
+    // Serial.println(theta2);
+    // Serial.print("Theta 3: ");
+    // Serial.println(theta3);
+    // Serial.print("Theta 1 update: ");
+    // Serial.println(theta1Update);
+    // Serial.print("Theta 2 update : ");
+    // Serial.println(theta2Update);
+    // Serial.print("Theta 3 update: ");
+    // Serial.println(theta3Update);
 
     Serial.print("this is REV_Theta1 - ");
     Serial.println(REV_Theta1); // printing REV_Theta1 value
@@ -34,27 +34,35 @@ void display() {
     // Serial.println(MSB3);
     // Serial.print("LSB3: ");
     // Serial.println(LSB3);
-    Serial.print("Px: ");
-    Serial.println(Px);
-    Serial.print("Py: ");
-    Serial.println(Py);
-    Serial.print("Pz: ");
-    Serial.println(Pz);
-    Serial.print("Px Update: ");
-    Serial.println(PxUpdate);
-    Serial.print("Py Update: ");
-    Serial.println(PyUpdate);
-    Serial.print("Pz Update: ");
-    Serial.println(PzUpdate);    
+    // Serial.print("Px: ");
+    // Serial.println(Px);
+    // Serial.print("Py: ");
+    // Serial.println(Py);
+    // Serial.print("Pz: ");
+    // Serial.println(Pz);
+    // Serial.print("Px Update: ");
+    // Serial.println(PxUpdate);
+    // Serial.print("Py Update: ");
+    // Serial.println(PyUpdate);
+    // Serial.print("Pz Update: ");
+    // Serial.println(PzUpdate);    
     
-    Serial.print("Kp: ");
-    Serial.println(kp);    
-    Serial.print("Ki: ");
-    Serial.println(ki);    
-    Serial.print("Kd: ");
-    Serial.println(kd);    
+    // Serial.print("Kp: ");
+    // Serial.println(kp);    
+    // Serial.print("Ki: ");
+    // Serial.println(ki);    
+    // Serial.print("Kd: ");
+    // Serial.println(kd);    
     Serial.println("--------------------------------------------------");    
 
+    Serial.print("Sensor 1: ");
+    Serial.println(digitalRead(sensor1Pin));
+    Serial.print("Sensor 2: ");
+    Serial.println(digitalRead(sensor2Pin));
+    Serial.print("Sensor 3: ");
+    Serial.println(digitalRead(sensor3Pin));
+    Serial.print("isStarter: ");
+    Serial.println(isStarter);
     timeMillis = millis();
   }
 

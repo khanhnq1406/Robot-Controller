@@ -8,59 +8,68 @@ const int led2 = 4;
 #include "soc/timer_group_struct.h"
 #include "soc/timer_group_reg.h"
 
-#define MotEnable2 21             // Motor Enamble pin Runs on PWM signal
-#define MotFwd2 18                // Motor Forward pin
-#define MotRev2 19                // Motor Reverse pin
+#define MotEnable2 21  // Motor Enamble pin Runs on PWM signal
+#define MotFwd2 18     // Motor Forward pin
+#define MotRev2 19     // Motor Reverse pin
 
-#define MotEnable3 17             // Motor Enamble pin Runs on PWM signal
-#define MotFwd3 5                // Motor Forward pin
-#define MotRev3 4                // Motor Reverse pin
+#define MotEnable3 17  // Motor Enamble pin Runs on PWM signal
+#define MotFwd3 5      // Motor Forward pin
+#define MotRev3 4      // Motor Reverse pin
 
-#define MotEnable1 27             // Motor Enamble pin Runs on PWM signal
-#define MotFwd1 12                // Motor Forward pin
-#define MotRev1 14                // Motor Reverse pin
+#define MotEnable1 27  // Motor Enamble pin Runs on PWM signal
+#define MotFwd1 12     // Motor Forward pin
+#define MotRev1 14     // Motor Reverse pin
 
-int encoderPin2A = 32;            // Encoder Output 'A' must connected with intreput pin of arduino.
-int encoderPin2B = 33;            // Encoder Otput 'B' must connected with intreput pin of arduino.
+int encoderPin2A = 32;  // Encoder Output 'A' must connected with intreput pin of arduino.
+int encoderPin2B = 33;  // Encoder Otput 'B' must connected with intreput pin of arduino.
 
-int encoderPin3A = 23;            // Encoder Output 'A' must connected with intreput pin of arduino.
-int encoderPin3B = 22;            // Encoder Otput 'B' must connected with intreput pin of arduino.
+int encoderPin3A = 23;  // Encoder Output 'A' must connected with intreput pin of arduino.
+int encoderPin3B = 22;  // Encoder Otput 'B' must connected with intreput pin of arduino.
 
-int encoderPin1A = 26;            // Encoder Output 'A' must connected with intreput pin of arduino.
-int encoderPin1B = 13;            // Encoder Otput 'B' must connected with intreput pin of arduino.
+int encoderPin1A = 26;  // Encoder Output 'A' must connected with intreput pin of arduino.
+int encoderPin1B = 13;  // Encoder Otput 'B' must connected with intreput pin of arduino.
+
+int sensor1Pin = 36; //SP
+int sensor2Pin = 39; // SN
+int sensor3Pin = 34;
 
 int MSB3;
 int LSB3;
 
-String readString;              // This while store the user inputTheta1 data
+String readString;  // This while store the user inputTheta1 data
 
 float theta1, theta2, theta3;
 float theta1Update, theta2Update, theta3Update;
 float Px, Py, Pz;
 float PxUpdate, PyUpdate, PzUpdate;
 
+
+int flagSensor1 = 0;
+int flagSensor2 = 0;
+int flagSensor3 = 0;
+
 float L1 = 114.55, L2 = 162, L3 = 130, d1 = 164.54, d2 = 69.5, d3 = 16;
 
-int User_Input = 0;             // This while convert inputTheta1 string into integer
+int User_Input = 0;  // This while convert inputTheta1 string into integer
 
-volatile int lastEncoded1 = 0;   // Here updated value of encoder store.
-volatile int lastEncoded2 = 0;   // Here updated value of encoder store.
-volatile int lastEncoded3 = 0;   // Here updated value of encoder store.
+volatile int lastEncoded1 = 0;  // Here updated value of encoder store.
+volatile int lastEncoded2 = 0;  // Here updated value of encoder store.
+volatile int lastEncoded3 = 0;  // Here updated value of encoder store.
 
-volatile long encoderValue1 = 0; // Raw encoder value
-volatile long encoderValue2 = 0; // Raw encoder value
-volatile long encoderValue3 = 0; // Raw encoder value
+volatile long encoderValue1 = 0;  // Raw encoder value
+volatile long encoderValue2 = 0;  // Raw encoder value
+volatile long encoderValue3 = 0;  // Raw encoder value
 
 // int PPR = 1600;                 // Encoder Pulse per revolution.
 // int angle = 360;                // Maximum degree of motion.
-int REV_Theta1 = 0;                    // Set point REQUIRED ENCODER VALUE
-int REV_Theta2 = 0;                    // Set point REQUIRED ENCODER VALUE
-int REV_Theta3 = 0;                    // Set point REQUIRED ENCODER VALUE
+int REV_Theta1 = 0;  // Set point REQUIRED ENCODER VALUE
+int REV_Theta2 = 0;  // Set point REQUIRED ENCODER VALUE
+int REV_Theta3 = 0;  // Set point REQUIRED ENCODER VALUE
 // int lastMSB = 0;
 // int lastLSB = 0;
 // OK PID
-double kp = 3, ki = 0, kd = 0.1; // 5        // modify for optimal performance
-double kp3 = 3, ki3 = 0, kd3 = 0.1; // 5        // modify for optimal performance
+double kp = 3, ki = 0, kd = 0.1;     // 5        // modify for optimal performance
+double kp3 = 3, ki3 = 0, kd3 = 0.1;  // 5        // modify for optimal performance
 
 
 double inputTheta1 = 0, outputTheta1 = 0, setpointTheta1 = 0;
@@ -71,12 +80,17 @@ PID PidTheta2(&inputTheta2, &outputTheta2, &setpointTheta2, kp, ki, kd, DIRECT);
 PID PidTheta3(&inputTheta3, &outputTheta3, &setpointTheta3, kp, ki, kd, DIRECT);
 
 unsigned long timeMillis;
+
+bool isStarter = true;
+bool isRestart = false;
+bool doneStarting = false;
 #include "serialInput.h"
 #include "display.h"
 #include "kinematics.h"
 #include "firebaseConnectEsp.h"
+#include "starter.h"
 void setup() {
-  Serial.begin(115200); 
+  Serial.begin(115200);
   pinMode(led1, OUTPUT);
   pinMode(led2, OUTPUT);
   Serial.println("Setup Starting");
@@ -93,23 +107,27 @@ void setup() {
   pinMode(MotFwd3, OUTPUT);
   pinMode(MotRev3, OUTPUT);
 
+  pinMode(sensor1Pin, INPUT);
+  pinMode(sensor2Pin, INPUT);
+  pinMode(sensor3Pin, INPUT);
+
   pinMode(encoderPin1A, INPUT_PULLUP);
   pinMode(encoderPin1B, INPUT_PULLUP);
-  
+
   pinMode(encoderPin2A, INPUT_PULLUP);
   pinMode(encoderPin2B, INPUT_PULLUP);
 
   pinMode(encoderPin3A, INPUT_PULLUP);
   pinMode(encoderPin3B, INPUT_PULLUP);
 
-  digitalWrite(encoderPin1A, HIGH); // turn pullup resistor on
-  digitalWrite(encoderPin1B, HIGH); // turn pullup resistor on
+  digitalWrite(encoderPin1A, HIGH);  // turn pullup resistor on
+  digitalWrite(encoderPin1B, HIGH);  // turn pullup resistor on
 
-  digitalWrite(encoderPin2A, HIGH); // turn pullup resistor on
-  digitalWrite(encoderPin2B, HIGH); // turn pullup resistor on
+  digitalWrite(encoderPin2A, HIGH);  // turn pullup resistor on
+  digitalWrite(encoderPin2B, HIGH);  // turn pullup resistor on
 
-  digitalWrite(encoderPin3A, HIGH); // turn pullup resistor on
-  digitalWrite(encoderPin3B, HIGH); // turn pullup resistor on
+  digitalWrite(encoderPin3A, HIGH);  // turn pullup resistor on
+  digitalWrite(encoderPin3B, HIGH);  // turn pullup resistor on
   // call updateEncoder() when any high/low changed seen
   // on interrupt 0 (pin 2), or interrupt 1 (pin 3)
   attachInterrupt(encoderPin1A, updateEncoder1, CHANGE);
@@ -120,50 +138,55 @@ void setup() {
 
   attachInterrupt(encoderPin3A, updateEncoder3, CHANGE);
   attachInterrupt(encoderPin3B, updateEncoder3, CHANGE);
+
+  //Interrupt endsensor
+  // attachInterrupt(sensor1Pin, turnOffMotor1, FALLING);
+  attachInterrupt(sensor2Pin, turnOffMotor2, FALLING);
+  attachInterrupt(sensor3Pin, turnOffMotor3, FALLING);
+
   // TCCR1B = TCCR1B & 0b11111000 | 1; // set 31KHz PWM to prevent motor noise
-  PidTheta1.SetMode(AUTOMATIC);         // set PID in Auto mode
-  PidTheta1.SetSampleTime(1);           // refresh rate of PID controller
-  PidTheta1.SetOutputLimits(-255, 255); // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
+  PidTheta1.SetMode(AUTOMATIC);          // set PID in Auto mode
+  PidTheta1.SetSampleTime(1);            // refresh rate of PID controller
+  PidTheta1.SetOutputLimits(-255, 255);  // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
 
-  PidTheta2.SetMode(AUTOMATIC);         // set PID in Auto mode
-  PidTheta2.SetSampleTime(1);           // refresh rate of PID controller
-  PidTheta2.SetOutputLimits(-255, 255); // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
+  PidTheta2.SetMode(AUTOMATIC);          // set PID in Auto mode
+  PidTheta2.SetSampleTime(1);            // refresh rate of PID controller
+  PidTheta2.SetOutputLimits(-255, 255);  // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
 
-  PidTheta3.SetMode(AUTOMATIC);         // set PID in Auto mode
-  PidTheta3.SetSampleTime(1);           // refresh rate of PID controller
-  PidTheta3.SetOutputLimits(-255, 255); // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
-  
+  PidTheta3.SetMode(AUTOMATIC);          // set PID in Auto mode
+  PidTheta3.SetSampleTime(1);            // refresh rate of PID controller
+  PidTheta3.SetOutputLimits(-255, 255);  // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
+
   timeMillis = millis();
   // Firebase
-  WiFi.begin (WIFI_SSID, WIFI_PASSWORD);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Dang ket noi");
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(500);
   }
 
-  Serial.println ("");
-  Serial.println ("Da ket noi WiFi!");
+  Serial.println("");
+  Serial.println("Da ket noi WiFi!");
   Serial.println(WiFi.localIP());
 
   /* Assign the api key (required) */
   config.api_key = API_KEY;
- 
+
   /* Assign the RTDB URL (required) */
   config.database_url = DATABASE_URL;
- 
+
   /* Sign up */
-  if (Firebase.signUp(&config, &auth, "", "")){
+  if (Firebase.signUp(&config, &auth, "", "")) {
     Serial.println("ok");
     signupOK = true;
-  }
-  else{
+  } else {
     Serial.printf("%s\n", config.signer.signupError.message.c_str());
   }
- 
+
   /* Assign the callback function for the long running token generation task */
   // config.token_status_callback = tokenStatusCallback; //see addons/TokenHelper.h
-   
+
   Firebase.begin(&config, &auth);
   Firebase.reconnectWiFi(true);
 
@@ -171,209 +194,217 @@ void setup() {
   Serial.println("Setup Done");
   //create a task that will be executed in the Task1code() function, with priority 1 and executed on core 0
   xTaskCreatePinnedToCore(
-                    Task1code,   /* Task function. */
-                    "Task1",     /* name of task. */
-                    10000,       /* Stack size of task */
-                    NULL,        /* parameter of the task */
-                    1,           /* priority of the task */
-                    &Task1,      /* Task handle to keep track of created task */
-                    0);          /* pin task to core 0 */                  
-  delay(500); 
+    Task1code, /* Task function. */
+    "Task1",   /* name of task. */
+    10000,     /* Stack size of task */
+    NULL,      /* parameter of the task */
+    1,         /* priority of the task */
+    &Task1,    /* Task handle to keep track of created task */
+    0);        /* pin task to core 0 */
+  delay(500);
 
   //create a task that will be executed in the Task2code() function, with priority 1 and executed on core 1
   xTaskCreatePinnedToCore(
-                    Task2code,   /* Task function. */
-                    "Task2",     /* name of task. */
-                    10000,       /* Stack size of task */
-                    NULL,        /* parameter of the task */
-                    1,           /* priority of the task */
-                    &Task2,      /* Task handle to keep track of created task */
-                    1);          /* pin task to core 1 */
-    delay(500); 
+    Task2code, /* Task function. */
+    "Task2",   /* name of task. */
+    10000,     /* Stack size of task */
+    NULL,      /* parameter of the task */
+    1,         /* priority of the task */
+    &Task2,    /* Task handle to keep track of created task */
+    1);        /* pin task to core 1 */
+  delay(500);
 }
 
-//Task1code: blinks an LED every 1000 ms
-void Task1code( void * pvParameters ){
+
+void Task1code(void* pvParameters) {
   Serial.print("Task1 running on core ");
   Serial.println(xPortGetCoreID());
-  for(;;){  
-    TIMERG0.wdt_wprotect=TIMG_WDT_WKEY_VALUE;
-    TIMERG0.wdt_feed=1;
-    TIMERG0.wdt_wprotect=0;
-    REV_Theta1 = map(theta1, 0, 360, 0, 6000); // mapping degree into pulse 130RPM: 2000, 247: 920
-    REV_Theta2 = map(theta2, 0, 360, 0, 7500); // mapping degree into pulse 130RPM: 2000, 247: 920
-    REV_Theta3 = map(theta3, 0, 360, 0, 3450); // mapping degree into pulse 130RPM: 2000, 247: 920
+  if (isStarter) {
+      start();
+      resetRotation();
+      delay(1000);
+      // getBeginRotation();
+  }
+  for (;;) {
+    if (isRestart) {
+      resetRotation();
+      start();
+      resetRotation();
+      // getBeginRotation();
+  }
+    TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE;
+    TIMERG0.wdt_feed = 1;
+    TIMERG0.wdt_wprotect = 0;
+    REV_Theta1 = map(theta1, 0, 360, 0, 6000);  // mapping degree into pulse 130RPM: 2000, 247: 920
+    REV_Theta2 = map(theta2, 0, 360, 0, 7500);  // mapping degree into pulse 130RPM: 2000, 247: 920
+    REV_Theta3 = map(theta3, 0, 360, 0, 3450);  // mapping degree into pulse 130RPM: 2000, 247: 920
 
-    setpointTheta1 = REV_Theta1;       // PID while work to achive this value consider as SET value
-    inputTheta1 = encoderValue1; // data from encoder consider as a Process value
+    setpointTheta1 = REV_Theta1;  // PID while work to achive this value consider as SET value
+    inputTheta1 = encoderValue1;  // data from encoder consider as a Process value
 
-    setpointTheta2 = REV_Theta2;       // PID while work to achive this value consider as SET value
-    inputTheta2 = encoderValue2; // data from encoder consider as a Process value
+    setpointTheta2 = REV_Theta2;  // PID while work to achive this value consider as SET value
+    inputTheta2 = encoderValue2;  // data from encoder consider as a Process value
 
-    setpointTheta3 = REV_Theta3;       // PID while work to achive this value consider as SET value
-    inputTheta3 = encoderValue3; // data from encoder consider as a Process value
-    PidTheta1.Compute(); // calculate new outputTheta1
-    PidTheta2.Compute(); // calculate new outputTheta1
-    PidTheta3.Compute(); // calculate new outputTheta1
+    setpointTheta3 = REV_Theta3;  // PID while work to achive this value consider as SET value
+    inputTheta3 = encoderValue3;  // data from encoder consider as a Process value
+    PidTheta1.Compute();          // calculate new outputTheta1
+    PidTheta2.Compute();          // calculate new outputTheta1
+    PidTheta3.Compute();          // calculate new outputTheta1
+    if (isStarter || isRestart) {
+      // resetRotation();
+      getBeginRotation();
+    }
     pwmOut(outputTheta1, outputTheta2, outputTheta3);
-  } 
+    if ((isStarter == true || isRestart == true) && REV_Theta1 <= encoderValue1 && REV_Theta2 <= encoderValue2 && REV_Theta3 <= encoderValue3) {
+      isStarter = false;
+      isRestart = false;
+      resetRotation();
+      // initData();
+      doneStarting = true;
+    }
+    // if (doneStarting) {
+    //   resetRotation();
+    //   doneStarting = false;
+    // }    
+  }
 }
 
 //Task2code: blinks an LED every 700 ms
-void Task2code( void * pvParameters ){
+void Task2code(void* pvParameters) {
   Serial.print("Task2 running on core ");
   Serial.println(xPortGetCoreID());
-  for(;;){
-    TIMERG0.wdt_wprotect=TIMG_WDT_WKEY_VALUE;
-    TIMERG0.wdt_feed=1;
-    TIMERG0.wdt_wprotect=0;
+  for (;;) {
+    TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE;
+    TIMERG0.wdt_feed = 1;
+    TIMERG0.wdt_wprotect = 0;
     display();
-    firebaseData();
-    serialInput();
-    // forwardKinematic();
+    if (doneStarting) {
+      initData();
+      doneStarting = false;
+    }
+    if (!isStarter && !isRestart) {
+      firebaseData();
+      // serialInput();
+      // forwardKinematic();
+    }
   }
 }
 
 void loop() {
   delay(1);
 }
-void pwmOut(int out1, int out2, int out3)
-{
-  if (out1 > 0)
-  {                              // if REV_Theta1 > encoderValue1 motor move in forward direction.
-    analogWrite(MotEnable1, out1); // Enabling motor enable pin to reach the desire angle
-    forward1();                   // calling motor to move forward
-  }
-  else
-  {
-    analogWrite(MotEnable1, abs(out1)); // if REV_Theta1 < encoderValue1 motor move in forward direction.
-    reverse1();                        // calling motor to move reverse
+void pwmOut(int out1, int out2, int out3) {
+  if (out1 > 0) {                   // if REV_Theta1 > encoderValue1 motor move in forward direction.
+    analogWrite(MotEnable1, out1);  // Enabling motor enable pin to reach the desire angle
+    forward1();                     // calling motor to move forward
+  } else {
+    analogWrite(MotEnable1, abs(out1));  // if REV_Theta1 < encoderValue1 motor move in forward direction.
+    reverse1();                          // calling motor to move reverse
   }
 
-  if (out2 > 0)
-  {                              // if REV_Theta1 > encoderValue1 motor move in forward direction.
-    analogWrite(MotEnable2, out2); // Enabling motor enable pin to reach the desire angle
-    forward2();                   // calling motor to move forward
-  }
-  else
-  {
-    analogWrite(MotEnable2, abs(out2)); // if REV_Theta1 < encoderValue1 motor move in forward direction.
-    reverse2();                        // calling motor to move reverse
+  if (out2 > 0) {                   // if REV_Theta1 > encoderValue1 motor move in forward direction.
+    analogWrite(MotEnable2, out2);  // Enabling motor enable pin to reach the desire angle
+    forward2();                     // calling motor to move forward
+  } else {
+    analogWrite(MotEnable2, abs(out2));  // if REV_Theta1 < encoderValue1 motor move in forward direction.
+    reverse2();                          // calling motor to move reverse
   }
 
-  if (out3 > 0)
-  {                              // if REV_Theta1 > encoderValue1 motor move in forward direction.
-    analogWrite(MotEnable3, out3); // Enabling motor enable pin to reach the desire angle
-    forward3();                   // calling motor to move forward
-  }
-  else
-  {
-    analogWrite(MotEnable3, abs(out3)); // if REV_Theta1 < encoderValue1 motor move in forward direction.
-    reverse3();                        // calling motor to move reverse
+  if (out3 > 0) {                   // if REV_Theta1 > encoderValue1 motor move in forward direction.
+    analogWrite(MotEnable3, out3);  // Enabling motor enable pin to reach the desire angle
+    forward3();                     // calling motor to move forward
+  } else {
+    analogWrite(MotEnable3, abs(out3));  // if REV_Theta1 < encoderValue1 motor move in forward direction.
+    reverse3();                          // calling motor to move reverse
   }
   readString = "";
-
 }
-void updateEncoder1()
-{
-  int MSB1 = digitalRead(encoderPin1A); // MSB1 = most significant bit
-  int LSB2 = digitalRead(encoderPin1B); // LSB2 = least significant bit
+void updateEncoder1() {
+  int MSB1 = digitalRead(encoderPin1A);  // MSB1 = most significant bit
+  int LSB2 = digitalRead(encoderPin1B);  // LSB2 = least significant bit
 
-  int encoded1 = (MSB1 << 1) | LSB2;         // converting the 2 pin value to single number
-  int sum1 = (lastEncoded1 << 2) | encoded1; // adding it to the previous encoded value
+  int encoded1 = (MSB1 << 1) | LSB2;          // converting the 2 pin value to single number
+  int sum1 = (lastEncoded1 << 2) | encoded1;  // adding it to the previous encoded value
 
   if (sum1 == 0b1101 || sum1 == 0b0100 || sum1 == 0b0010 || sum1 == 0b1011)
     encoderValue1++;
   if (sum1 == 0b1110 || sum1 == 0b0111 || sum1 == 0b0001 || sum1 == 0b1000)
     encoderValue1--;
 
-  lastEncoded1 = encoded1; // store this value for next timeMillis
+  lastEncoded1 = encoded1;  // store this value for next timeMillis
 }
 
-void updateEncoder2()
-{
-  int MSB2 = digitalRead(encoderPin2A); // MSB2 = most significant bit
-  int LSB2 = digitalRead(encoderPin2B); // LSB2 = least significant bit
+void updateEncoder2() {
+  int MSB2 = digitalRead(encoderPin2A);  // MSB2 = most significant bit
+  int LSB2 = digitalRead(encoderPin2B);  // LSB2 = least significant bit
 
-  int encoded2 = (MSB2 << 1) | LSB2;         // converting the 2 pin value to single number
-  int sum2 = (lastEncoded2 << 2) | encoded2; // adding it to the previous encoded value
+  int encoded2 = (MSB2 << 1) | LSB2;          // converting the 2 pin value to single number
+  int sum2 = (lastEncoded2 << 2) | encoded2;  // adding it to the previous encoded value
 
   if (sum2 == 0b1101 || sum2 == 0b0100 || sum2 == 0b0010 || sum2 == 0b1011)
     encoderValue2++;
   if (sum2 == 0b1110 || sum2 == 0b0111 || sum2 == 0b0001 || sum2 == 0b1000)
     encoderValue2--;
 
-  lastEncoded2 = encoded2; // store this value for next timeMillis
+  lastEncoded2 = encoded2;  // store this value for next timeMillis
   // readString = "";
-
 }
 
-void updateEncoder3()
-{
-  MSB3 = digitalRead(encoderPin3A); // MSB3 = most significant bit
-  LSB3 = digitalRead(encoderPin3B); // LSB3 = least significant bit
+void updateEncoder3() {
+  MSB3 = digitalRead(encoderPin3A);  // MSB3 = most significant bit
+  LSB3 = digitalRead(encoderPin3B);  // LSB3 = least significant bit
 
-  int encoded3 = (MSB3 << 1) | LSB3;         // converting the 2 pin value to single number
-  int sum3 = (lastEncoded3 << 2) | encoded3; // adding it to the previous encoded value
+  int encoded3 = (MSB3 << 1) | LSB3;          // converting the 2 pin value to single number
+  int sum3 = (lastEncoded3 << 2) | encoded3;  // adding it to the previous encoded value
 
   if (sum3 == 0b1101 || sum3 == 0b0100 || sum3 == 0b0010 || sum3 == 0b1011)
     encoderValue3++;
   if (sum3 == 0b1110 || sum3 == 0b0111 || sum3 == 0b0001 || sum3 == 0b1000)
     encoderValue3--;
 
-  lastEncoded3 = encoded3; // store this value for next timeMillis
-  
-  // readString = "";
+  lastEncoded3 = encoded3;  // store this value for next timeMillis
 
+  // readString = "";
 }
 
-void forward1()
-{
+void forward1() {
   digitalWrite(MotFwd1, HIGH);
   digitalWrite(MotRev1, LOW);
 }
 
-void reverse1()
-{
+void reverse1() {
   digitalWrite(MotFwd1, LOW);
   digitalWrite(MotRev1, HIGH);
 }
-void finish1()
-{
+void finish1() {
   digitalWrite(MotFwd1, LOW);
   digitalWrite(MotRev1, LOW);
 }
 
-void forward2()
-{
+void forward2() {
   digitalWrite(MotFwd2, HIGH);
   digitalWrite(MotRev2, LOW);
 }
 
-void reverse2()
-{
+void reverse2() {
   digitalWrite(MotFwd2, LOW);
   digitalWrite(MotRev2, HIGH);
 }
-void finish2()
-{
+void finish2() {
   digitalWrite(MotFwd2, LOW);
   digitalWrite(MotRev2, LOW);
 }
 
-void forward3()
-{
+void forward3() {
   digitalWrite(MotFwd3, HIGH);
   digitalWrite(MotRev3, LOW);
 }
 
-void reverse3()
-{
+void reverse3() {
   digitalWrite(MotFwd3, LOW);
   digitalWrite(MotRev3, HIGH);
 }
-void finish3()
-{
+void finish3() {
   digitalWrite(MotFwd3, LOW);
   digitalWrite(MotRev3, LOW);
 }

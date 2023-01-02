@@ -265,14 +265,18 @@ class HomeController {
         theta3 = theta3Cal.toFixed(2);
       }
       try {
-        thetaRef.set({
-          theta1: Number(theta1),
-          theta2: Number(theta2),
-          theta3: Number(theta3),
-          position1: Number(position1),
-          position2: Number(position2),
-          position3: Number(position3),
-          actuator: actuator,
+        thetaRef.once("value", (snapshot) => {
+          const data = snapshot.val();
+          thetaRef.set({
+            theta1: Number(theta1),
+            theta2: Number(theta2),
+            theta3: Number(theta3),
+            position1: Number(position1),
+            position2: Number(position2),
+            position3: Number(position3),
+            actuator: actuator,
+            goHome: data.goHome,
+          });
         });
         res.render("controller", {
           theta1: theta1,
@@ -296,6 +300,7 @@ class HomeController {
             position3: data.position3,
             isWrongPosition: true,
             actuator: data.actuator,
+            goHome: data.goHome,
           });
         });
       }
@@ -352,7 +357,23 @@ class HomeController {
         position2: data.position2,
         position3: data.position3,
         actuator: data.actuator,
+        goHome: data.goHome,
       });
+    });
+    res.redirect("/controller");
+  }
+  goHome(req, res, next) {
+    var database = firebase.database();
+    let thetaRef = database.ref("Theta");
+    thetaRef.set({
+      theta1: Number(0),
+      theta2: Number(0),
+      theta3: Number(0),
+      position1: Number(406.55),
+      position2: Number(0),
+      position3: Number(164.54),
+      actuator: Number(0),
+      goHome: true,
     });
     res.redirect("/controller");
   }
