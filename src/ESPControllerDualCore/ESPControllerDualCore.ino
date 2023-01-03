@@ -226,12 +226,6 @@ void Task1code(void* pvParameters) {
       // getBeginRotation();
   }
   for (;;) {
-    if (isRestart) {
-      resetRotation();
-      start();
-      resetRotation();
-      // getBeginRotation();
-  }
     TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE;
     TIMERG0.wdt_feed = 1;
     TIMERG0.wdt_wprotect = 0;
@@ -250,22 +244,22 @@ void Task1code(void* pvParameters) {
     PidTheta1.Compute();          // calculate new outputTheta1
     PidTheta2.Compute();          // calculate new outputTheta1
     PidTheta3.Compute();          // calculate new outputTheta1
-    if (isStarter || isRestart) {
+    if (isStarter) {
       // resetRotation();
       getBeginRotation();
     }
     pwmOut(outputTheta1, outputTheta2, outputTheta3);
-    if ((isStarter == true || isRestart == true) && REV_Theta1 <= encoderValue1 && REV_Theta2 <= encoderValue2 && REV_Theta3 <= encoderValue3) {
+    if (isStarter == true && REV_Theta1 <= encoderValue1 && REV_Theta2 <= encoderValue2 && REV_Theta3 <= encoderValue3) {
       isStarter = false;
-      isRestart = false;
+      // isRestart = false;
       resetRotation();
       // initData();
       doneStarting = true;
     }
-    // if (doneStarting) {
-    //   resetRotation();
-    //   doneStarting = false;
-    // }    
+    if (doneStarting) {
+      resetRotation();
+      doneStarting = false;
+    }    
   }
 }
 
@@ -278,11 +272,11 @@ void Task2code(void* pvParameters) {
     TIMERG0.wdt_feed = 1;
     TIMERG0.wdt_wprotect = 0;
     display();
-    if (doneStarting) {
-      initData();
-      doneStarting = false;
-    }
-    if (!isStarter && !isRestart) {
+    // if (doneStarting) {
+    //   initData();
+    //   doneStarting = false;
+    // }
+    if (!isStarter) {
       firebaseData();
       // serialInput();
       // forwardKinematic();
