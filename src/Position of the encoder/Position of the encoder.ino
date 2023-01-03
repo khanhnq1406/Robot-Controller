@@ -1,36 +1,47 @@
-/*
- * The purpose of this code is to count the ouput pulses or
- * the encoder outputs as you rotate the Motor shaft. You can run the
- * same code on the Arduino Uno, Arduino Nano, Arduino Mega, etc.
- */
-#define Encoder_output_A 2 // pin2 of the Arduino
-#define Encoder_output_B 3 // pin 3 of the Arduino
-// these two pins has the hardware interrupts as well.
-
-int Count_pulses = 0;
+volatile unsigned int temp, counter = 0; //This variable will increase or decrease depending on the rotation of encoder
 void setup()
 {
-  Serial.begin(9600);                      // activates the serial communication
-  pinMode(Encoder_output_A, INPUT_PULLUP); // sets the Encoder_output_A pin as the input
-  pinMode(Encoder_output_B, INPUT_PULLUP); // sets the Encoder_output_B pin as the input
-  attachInterrupt(digitalPinToInterrupt(Encoder_output_A), DC_Motor_Encoder, RISING);
+    Serial.begin(9600);
+    pinMode(2, INPUT_PULLUP); // internal pullup input pin 2
+    pinMode(3, INPUT_PULLUP); // internalเป็น pullup input pin 3
+                              //Setting up interrupt
+    //A rising pulse from encodenren activated ai0(). AttachInterrupt 0 is DigitalPin nr 2 on moust Arduino.
+    attachInterrupt(0, ai0, RISING);
+    //B rising pulse from encodenren activated ai1(). AttachInterrupt 1 is DigitalPin nr 3 on moust Arduino.
+    attachInterrupt(1, ai1, RISING);
 }
-
 void loop()
 {
-  Serial.println("Result: ");
-  Serial.println(Count_pulses);
+    // Send the value of counter
+    if (counter != temp)
+    {
+        Serial.println(counter);
+        temp = counter;
+    }
 }
-
-void DC_Motor_Encoder()
+void ai0()
 {
-  int b = digitalRead(Encoder_output_B);
-  if (b > 0)
-  {
-    Count_pulses++;
-  }
-  else
-  {
-    Count_pulses--;
-  }
+    // ai0 is activated if DigitalPin nr 2 is going from LOW to HIGH
+    // Check pin 3 to determine the direction
+    if (digitalRead(3) == LOW)
+    {
+        counter++;
+    }
+    else
+    {
+        counter--;
+    }
+}
+void ai1()
+{
+    // ai0 is activated if DigitalPin nr 3 is going from LOW to HIGH
+    // Check with pin 2 to determine the direction
+    if (digitalRead(2) == LOW)
+    {
+        counter--;
+    }
+    else
+    {
+        counter++;
+    }
 }

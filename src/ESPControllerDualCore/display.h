@@ -63,6 +63,8 @@ void display() {
     Serial.println(digitalRead(sensor3Pin));
     Serial.print("isStarter: ");
     Serial.println(isStarter);
+    Serial.print("isRestart: ");
+    Serial.println(isRestart);
     timeMillis = millis();
   }
 

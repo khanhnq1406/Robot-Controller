@@ -1,21 +1,16 @@
-int x;
-
+#include "config.h"
+#include "recvData.h"
+#include "controlMotor.h"
+#include "setup.h"
 void setup() {
   Serial.begin(115200);
-  Serial.setTimeout(1);
-  pinMode(LED_BUILTIN, OUTPUT);
+  Serial.setTimeout(1); 
+  motor1Setup();
+  motor2Setup();
+  motor3Setup();
 }
 
 void loop() {
-
-  while (!Serial.available());
-    x = Serial.readString().toInt(); // đọc data từ python
-  Serial.print(x); // gửi data về python
-
-  if (x == 1) {
-    digitalWrite(LED_BUILTIN, HIGH);
-  }
-  else if (x == 0) {
-    digitalWrite(LED_BUILTIN, LOW);
-  }
+  recvData();
+  controlMotor();
 }

@@ -3,7 +3,7 @@
 #define rxPin 12
 #define txPin 13
 // SoftwareSerial SUART(rxPin, txPin);  //D2, D1 = SRX, STX
-SoftwareSerial mySerial =  SoftwareSerial(rxPin, txPin);
+SoftwareSerial mySerial (rxPin, txPin);
 char buff[50] = "";
 volatile byte indx;
 int theta[3], indexTheta = 0;

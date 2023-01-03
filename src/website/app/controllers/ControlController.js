@@ -337,6 +337,7 @@ class HomeController {
         position2: data.position2,
         position3: data.position3,
         actuator: data.actuator,
+        goHome: false,
       });
     });
     res.redirect("/controller");
@@ -357,7 +358,7 @@ class HomeController {
         position2: data.position2,
         position3: data.position3,
         actuator: data.actuator,
-        goHome: data.goHome,
+        goHome: false,
       });
     });
     res.redirect("/controller");

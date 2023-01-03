@@ -78,7 +78,7 @@ void start() {
       break;
     }
     if (encoderValue1 >= REV_Theta1) {
-      REV_Theta1 += 100;
+      REV_Theta1 += 150;
     }
     setpointTheta1 = REV_Theta1;  // PID while work to achive this value consider as SET value
     inputTheta1 = encoderValue1;  // data from encoder consider as a Process value

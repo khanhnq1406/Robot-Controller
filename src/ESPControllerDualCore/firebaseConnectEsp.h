@@ -1,3 +1,4 @@
+#include "esp32-hal-log.h"
 #include "Arduino.h"
 #include <string.h>
 #include <stdlib.h>  
@@ -109,7 +110,14 @@ void firebaseData()
     }
 
     if (Firebase.RTDB.getBool(&fbdo, "/Theta/goHome")) {
-        isRestart = fbdo.boolData();
+        isGoHome = fbdo.boolData();
+        if (isGoHome) {
+          theta1 = -10;
+          theta2 = 0;
+          theta3 = 0;
+          delay(1000);
+          isRestart = true;
+        }
     }
     else {
       Serial.println(fbdo.errorReason());
@@ -118,5 +126,5 @@ void firebaseData()
 }
 
 void initData() {
-  Firebase.RTDB.setBool (&fbdo,"/Theta/goHome", false);
+  Firebase.RTDB.setBool(&fbdo,"/Theta/goHome", false);
 }

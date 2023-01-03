@@ -83,7 +83,10 @@ unsigned long timeMillis;
 
 bool isStarter = true;
 bool isRestart = false;
+bool isGoHome = false;
+bool step2Restart = false;
 bool doneStarting = false;
+bool doneRestart = false;
 #include "serialInput.h"
 #include "display.h"
 #include "kinematics.h"
@@ -151,11 +154,11 @@ void setup() {
 
   PidTheta2.SetMode(AUTOMATIC);          // set PID in Auto mode
   PidTheta2.SetSampleTime(1);            // refresh rate of PID controller
-  PidTheta2.SetOutputLimits(-255, 255);  // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
+  PidTheta2.SetOutputLimits(-255, 240);  // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
 
   PidTheta3.SetMode(AUTOMATIC);          // set PID in Auto mode
   PidTheta3.SetSampleTime(1);            // refresh rate of PID controller
-  PidTheta3.SetOutputLimits(-255, 255);  // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
+  PidTheta3.SetOutputLimits(-255, 240);  // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
 
   timeMillis = millis();
   // Firebase
@@ -231,11 +234,16 @@ void Task1code(void* pvParameters) {
     TIMERG0.wdt_feed = 1;
     TIMERG0.wdt_wprotect = 0;
     if (isStarter) {
-      // resetRotation();
-      // Serial.println("Get rotation START");
       getBeginRotation();
       outputTheta1 = 0;
-      // Serial.println("Get rotation DONE");
+    }
+    if (isRestart) {
+      resetRotation();
+      start();
+      resetRotation();
+      isRestart = false;
+      step2Restart = true;
+      getBeginRotation();
     }
     REV_Theta1 = map(theta1, 0, 360, 0, 6000);  // mapping degree into pulse 130RPM: 2000, 247: 920
     REV_Theta2 = map(theta2, 0, 360, 0, 7500);  // mapping degree into pulse 130RPM: 2000, 247: 920
@@ -253,27 +261,26 @@ void Task1code(void* pvParameters) {
     PidTheta2.Compute();          // calculate new outputTheta1
     PidTheta3.Compute();          // calculate new outputTheta1
     if (isStarter) {
-      // resetRotation();
-      // Serial.println("Get rotation START");
       getBeginRotation();
-      // Serial.println("Get rotation DONE");
+    }
+    if (step2Restart) {
+      getBeginRotation();
     }
     pwmOut(outputTheta1, outputTheta2, outputTheta3);
     if (isStarter == true && REV_Theta1 <= encoderValue1 && REV_Theta2 <= encoderValue2 && REV_Theta3 <= encoderValue3) {
-      // Serial.println("condition start START");
       isStarter = false;
-      // isRestart = false;
       resetRotation();
-      // initData();
       doneStarting = true;
-      // Serial.println("condition start DONE");
     }
     if (doneStarting) {
-      // Serial.println("doneStarting START");
       resetRotation();
-      // Serial.println("doneStarting DONE");
       doneStarting = false;
     }    
+    if (step2Restart == true && REV_Theta1 <= encoderValue1 && REV_Theta2 <= encoderValue2 && REV_Theta3 <= encoderValue3) {
+      step2Restart = false;
+      resetRotation();
+      doneRestart = true;
+    }
   }
 }
 
@@ -286,14 +293,15 @@ void Task2code(void* pvParameters) {
     TIMERG0.wdt_feed = 1;
     TIMERG0.wdt_wprotect = 0;
     display();
-    // if (doneStarting) {
-    //   initData();
-    //   doneStarting = false;
-    // }
-    if (!isStarter) {
+    if (isStarter == false && isRestart == false && step2Restart == false) {
       firebaseData();
       // serialInput();
       // forwardKinematic();
+    }
+    if (doneRestart) {
+      Firebase.RTDB.setBool(&fbdo,"/Theta/goHome", false);
+      delay(1000);
+      doneRestart = false;
     }
   }
 }
