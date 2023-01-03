@@ -17,8 +17,8 @@ const int led2 = 4;
 #define MotRev3 4      // Motor Reverse pin
 
 #define MotEnable1 27  // Motor Enamble pin Runs on PWM signal
-#define MotFwd1 12     // Motor Forward pin
-#define MotRev1 14     // Motor Reverse pin
+#define MotFwd1 14     // Motor Forward pin
+#define MotRev1 12     // Motor Reverse pin
 
 int encoderPin2A = 32;  // Encoder Output 'A' must connected with intreput pin of arduino.
 int encoderPin2B = 33;  // Encoder Otput 'B' must connected with intreput pin of arduino.
@@ -222,6 +222,7 @@ void Task1code(void* pvParameters) {
   if (isStarter) {
       start();
       resetRotation();
+      Serial.print("RESET rotation DONE");
       delay(1000);
       // getBeginRotation();
   }
@@ -229,6 +230,13 @@ void Task1code(void* pvParameters) {
     TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE;
     TIMERG0.wdt_feed = 1;
     TIMERG0.wdt_wprotect = 0;
+    if (isStarter) {
+      // resetRotation();
+      // Serial.println("Get rotation START");
+      getBeginRotation();
+      outputTheta1 = 0;
+      // Serial.println("Get rotation DONE");
+    }
     REV_Theta1 = map(theta1, 0, 360, 0, 6000);  // mapping degree into pulse 130RPM: 2000, 247: 920
     REV_Theta2 = map(theta2, 0, 360, 0, 7500);  // mapping degree into pulse 130RPM: 2000, 247: 920
     REV_Theta3 = map(theta3, 0, 360, 0, 3450);  // mapping degree into pulse 130RPM: 2000, 247: 920
@@ -246,18 +254,24 @@ void Task1code(void* pvParameters) {
     PidTheta3.Compute();          // calculate new outputTheta1
     if (isStarter) {
       // resetRotation();
+      // Serial.println("Get rotation START");
       getBeginRotation();
+      // Serial.println("Get rotation DONE");
     }
     pwmOut(outputTheta1, outputTheta2, outputTheta3);
     if (isStarter == true && REV_Theta1 <= encoderValue1 && REV_Theta2 <= encoderValue2 && REV_Theta3 <= encoderValue3) {
+      // Serial.println("condition start START");
       isStarter = false;
       // isRestart = false;
       resetRotation();
       // initData();
       doneStarting = true;
+      // Serial.println("condition start DONE");
     }
     if (doneStarting) {
+      // Serial.println("doneStarting START");
       resetRotation();
+      // Serial.println("doneStarting DONE");
       doneStarting = false;
     }    
   }

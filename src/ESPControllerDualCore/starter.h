@@ -7,7 +7,7 @@ int starterX = 0;
 int starterY = 150;
 int starterZ = 160;
 void getBeginRotation() {
-  theta1 = starterX;
+  theta1 = 0;
   theta2 = starterY;
   theta3 = starterZ;
 }
@@ -78,15 +78,15 @@ void start() {
       break;
     }
     if (encoderValue1 >= REV_Theta1) {
-      REV_Theta1 += 50;
+      REV_Theta1 += 100;
     }
     setpointTheta1 = REV_Theta1;  // PID while work to achive this value consider as SET value
     inputTheta1 = encoderValue1;  // data from encoder consider as a Process value
 
     PidTheta1.Compute();                    // calculate new outputTheta1
     analogWrite(MotEnable1, outputTheta1);  // Enabling motor enable pin to reach the desire angle
-    digitalWrite(MotFwd1, LOW);
-    digitalWrite(MotRev1, HIGH);
+    digitalWrite(MotFwd1, HIGH);
+    digitalWrite(MotRev1, LOW);
   }
 }
 

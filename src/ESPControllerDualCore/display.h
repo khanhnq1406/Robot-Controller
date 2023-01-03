@@ -2,12 +2,12 @@ void display() {
 
   if ((unsigned long)(millis() - timeMillis) > 100)
   {
-    // Serial.print("Theta 1: ");
-    // Serial.println(theta1);
-    // Serial.print("Theta 2: ");
-    // Serial.println(theta2);
-    // Serial.print("Theta 3: ");
-    // Serial.println(theta3);
+    Serial.print("Theta 1: ");
+    Serial.println(theta1);
+    Serial.print("Theta 2: ");
+    Serial.println(theta2);
+    Serial.print("Theta 3: ");
+    Serial.println(theta3);
     // Serial.print("Theta 1 update: ");
     // Serial.println(theta1Update);
     // Serial.print("Theta 2 update : ");
