@@ -1,7 +1,7 @@
 #include "esp32-hal-log.h"
 #include "Arduino.h"
 #include <string.h>
-#include <stdlib.h>  
+#include <stdlib.h>
 #include "config.h"
 #include <iostream>
 // ---------- FireBase --------------
@@ -24,107 +24,110 @@ bool signupOK = false;
 
 
 void updateData() {
-  Firebase.RTDB.setFloat (&fbdo,"/Theta/theta1/", theta1);
-  Firebase.RTDB.setFloat (&fbdo,"/Theta/theta2/", theta2);
-  Firebase.RTDB.setFloat (&fbdo,"/Theta/theta3/", theta3);
-  Firebase.RTDB.setFloat (&fbdo,"/Theta/position1/", Px);
-  Firebase.RTDB.setFloat (&fbdo,"/Theta/position2/", Py);
-  Firebase.RTDB.setFloat (&fbdo,"/Theta/position3/", Pz);
-}  
-void firebaseData()
-{
+  Firebase.RTDB.setFloat(&fbdo, "/Theta/theta1/", theta1);
+  Firebase.RTDB.setFloat(&fbdo, "/Theta/theta2/", theta2);
+  Firebase.RTDB.setFloat(&fbdo, "/Theta/theta3/", theta3);
+  Firebase.RTDB.setFloat(&fbdo, "/Theta/position1/", Px);
+  Firebase.RTDB.setFloat(&fbdo, "/Theta/position2/", Py);
+  Firebase.RTDB.setFloat(&fbdo, "/Theta/position3/", Pz);
+}
+void firebaseData() {
   String sendMsg;
   char sendMsgChar[50] = "";
   if ((millis() - millisRecv > 100 || millisRecv == 0)) {
     millisRecv = millis();
     if (Firebase.RTDB.getFloat(&fbdo, "/Theta/theta1")) {
-        theta1Update = fbdo.floatData();
-        if (theta1 != theta1Update) {
-          theta1 = theta1Update;
-          // forwardKinematic();
-          // updateData();
-        }
-    }
-    else {
+      theta1Update = fbdo.floatData();
+      if (theta1 != theta1Update) {
+        theta1 = theta1Update;
+        // forwardKinematic();
+        // updateData();
+      }
+    } else {
       Serial.println(fbdo.errorReason());
     }
 
     if (Firebase.RTDB.getFloat(&fbdo, "/Theta/theta2")) {
-        theta2Update = fbdo.floatData();
-        if (theta2 != theta2Update) {
-          theta2 = theta2Update;
-          // forwardKinematic();
-          // updateData();
-        }
-    }
-    else {
+      theta2Update = fbdo.floatData();
+      if (theta2 != theta2Update) {
+        theta2 = theta2Update;
+        // forwardKinematic();
+        // updateData();
+      }
+    } else {
       Serial.println(fbdo.errorReason());
     }
 
     if (Firebase.RTDB.getFloat(&fbdo, "/Theta/theta3")) {
-        theta3Update = fbdo.floatData();
-        if (theta3 != theta3Update) {
-          theta3 = theta3Update;
-          // forwardKinematic();
-          // updateData();
-        }
-    }
-    else {
+      theta3Update = fbdo.floatData();
+      if (theta3 != theta3Update) {
+        theta3 = -theta3Update;
+        // forwardKinematic();
+        // updateData();
+      }
+    } else {
       Serial.println(fbdo.errorReason());
     }
 
     if (Firebase.RTDB.getFloat(&fbdo, "/Theta/position1")) {
-        PxUpdate = fbdo.floatData();
-        if (Px != PxUpdate) {
-          Px = PxUpdate;
-          // inverseKinematic();
-          // updateData();
-        }
-    }
-    else {
+      PxUpdate = fbdo.floatData();
+      if (Px != PxUpdate) {
+        Px = PxUpdate;
+        // inverseKinematic();
+        // updateData();
+      }
+    } else {
       Serial.println(fbdo.errorReason());
     }
 
     if (Firebase.RTDB.getFloat(&fbdo, "/Theta/position2")) {
-        PyUpdate = fbdo.floatData();
-        if (Py != PyUpdate) {
-          Py = PyUpdate;
-          // inverseKinematic();
-          // updateData();
-        }
-    }
-    else {
+      PyUpdate = fbdo.floatData();
+      if (Py != PyUpdate) {
+        Py = PyUpdate;
+        // inverseKinematic();
+        // updateData();
+      }
+    } else {
       Serial.println(fbdo.errorReason());
     }
 
     if (Firebase.RTDB.getFloat(&fbdo, "/Theta/position3")) {
-        PzUpdate = fbdo.floatData();
-        if (Pz != PzUpdate) {
-          Pz = PzUpdate;
-          // inverseKinematic();
-          // updateData();
-        }
-    }
-    else {
+      PzUpdate = fbdo.floatData();
+      if (Pz != PzUpdate) {
+        Pz = PzUpdate;
+        // inverseKinematic();
+        // updateData();
+      }
+    } else {
       Serial.println(fbdo.errorReason());
     }
 
     if (Firebase.RTDB.getBool(&fbdo, "/Theta/goHome")) {
-        isGoHome = fbdo.boolData();
-        if (isGoHome) {
-          theta1 = -10;
-          theta2 = 0;
-          theta3 = 0;
-          delay(1000);
-          isRestart = true;
-        }
+      isGoHome = fbdo.boolData();
+      if (isGoHome) {
+        theta1 = -10;
+        theta2 = 0;
+        theta3 = 0;
+        delay(1000);
+        isRestart = true;
+      }
+    } else {
+      Serial.println(fbdo.errorReason());
     }
-    else {
+
+    if (Firebase.RTDB.getBool(&fbdo, "/Theta/actuator")) {
+      actuator = fbdo.boolData();
+      if (actuator) {
+        digitalWrite(actuatorPin, LOW);
+      } else {
+        digitalWrite(actuatorPin, HIGH);
+      }
+    } else {
       Serial.println(fbdo.errorReason());
     }
   }
 }
 
 void initData() {
-  Firebase.RTDB.setBool(&fbdo,"/Theta/goHome", false);
+  Firebase.RTDB.setBool(&fbdo, "/Theta/goHome", false);
 }

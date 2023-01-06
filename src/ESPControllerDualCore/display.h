@@ -61,10 +61,14 @@ void display() {
     Serial.println(digitalRead(sensor2Pin));
     Serial.print("Sensor 3: ");
     Serial.println(digitalRead(sensor3Pin));
+    Serial.print("Actuator: ");
+    Serial.println(digitalRead(actuatorPin));
     Serial.print("isStarter: ");
     Serial.println(isStarter);
     Serial.print("isRestart: ");
     Serial.println(isRestart);
+    Serial.print("actuator: ");
+    Serial.println(actuator);
     timeMillis = millis();
   }
 

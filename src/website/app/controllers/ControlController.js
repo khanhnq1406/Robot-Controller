@@ -238,12 +238,12 @@ class HomeController {
           d1 = 164.54,
           d2 = 69.5,
           d3 = 16;
-        let theta1Cal =
-          Math.atan2(position2, position1 - L1) * (180 / 3.141592);
+        let theta1Cal = Math.atan2(position2, position1 - L1);
+
         const nx =
-          position1 * Math.cos((theta1Cal * 3.14159) / 180) +
-          position2 * Math.sin((theta1Cal * 3.14159) / 180) -
-          L1 * Math.cos((theta1Cal * 3.14159) / 180);
+          position1 * Math.cos(theta1Cal) +
+          position2 * Math.sin(theta1Cal) -
+          L1 * Math.cos(theta1Cal);
         const ny = position3 - d1;
         const c3 =
           (Math.pow(nx, 2) +
@@ -252,17 +252,21 @@ class HomeController {
             Math.pow(L2, 2)) /
           (2 * L3 * L2);
         const s3 = Math.sqrt(1 - Math.pow(c3, 2));
-        let theta3Cal = Math.atan2(s3, c3) * (180 / 3.141592);
+
+        let theta3Cal = Math.atan2(s3, c3);
+
         const c2 =
           (nx * (L3 * c3 + L2) + L3 * s3 * ny) /
           (Math.pow(L3 * c3 + L2, 2) + Math.pow(L3, 2) * Math.pow(s3, 2));
         const s2 =
           (ny * (L3 * c3 + L2) - L3 * s3 * nx) /
           (Math.pow(L3 * c3 + L2, 2) + Math.pow(L3, 2) * Math.pow(s3, 2));
-        let theta2Cal = Math.atan2(s2, c2) * (180 / 3.141592);
-        theta1 = theta1Cal.toFixed(2);
-        theta2 = theta2Cal.toFixed(2);
-        theta3 = theta3Cal.toFixed(2);
+
+        let theta2Cal = Math.atan2(s2, c2);
+        // let theta2Cal = -theta3;
+        theta1 = ((theta1Cal * 180) / Math.PI).toFixed(2);
+        theta2 = ((theta2Cal * 180) / Math.PI).toFixed(2);
+        theta3 = ((theta3Cal * 180) / Math.PI).toFixed(2);
       }
       try {
         thetaRef.once("value", (snapshot) => {
@@ -373,8 +377,24 @@ class HomeController {
       position1: Number(406.55),
       position2: Number(0),
       position3: Number(164.54),
-      actuator: Number(0),
+      actuator: false,
       goHome: true,
+    });
+    res.redirect("/controller");
+  }
+
+  goHomeSoftware(req, res, next) {
+    var database = firebase.database();
+    let thetaRef = database.ref("Theta");
+    thetaRef.set({
+      theta1: Number(0),
+      theta2: Number(0),
+      theta3: Number(0),
+      position1: Number(406.55),
+      position2: Number(0),
+      position3: Number(164.54),
+      actuator: false,
+      goHome: false,
     });
     res.redirect("/controller");
   }

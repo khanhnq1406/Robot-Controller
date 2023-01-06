@@ -2,196 +2,200 @@ TaskHandle_t Task1;
 TaskHandle_t Task2;
 
 // LED pins
-const int led1 = 2;
-const int led2 = 4;
+// const int led1 = 2;
+// const int led2 = 4;
 #include <PID_v1.h>
 #include "soc/timer_group_struct.h"
 #include "soc/timer_group_reg.h"
 
-#define MotEnable2 21  // Motor Enamble pin Runs on PWM signal
-#define MotFwd2 18     // Motor Forward pin
-#define MotRev2 19     // Motor Reverse pin
+  #define MotEnable2 21  // Motor Enamble pin Runs on PWM signal
+  #define MotFwd2 18     // Motor Forward pin
+  #define MotRev2 19     // Motor Reverse pin
 
-#define MotEnable3 17  // Motor Enamble pin Runs on PWM signal
-#define MotFwd3 5      // Motor Forward pin
-#define MotRev3 4      // Motor Reverse pin
+  #define MotEnable3 17  // Motor Enamble pin Runs on PWM signal
+  #define MotFwd3 5      // Motor Forward pin
+  #define MotRev3 4      // Motor Reverse pin
 
-#define MotEnable1 27  // Motor Enamble pin Runs on PWM signal
-#define MotFwd1 14     // Motor Forward pin
-#define MotRev1 12     // Motor Reverse pin
+  #define MotEnable1 27  // Motor Enamble pin Runs on PWM signal
+  #define MotFwd1 14     // Motor Forward pin
+  #define MotRev1 12     // Motor Reverse pin
 
-int encoderPin2A = 32;  // Encoder Output 'A' must connected with intreput pin of arduino.
-int encoderPin2B = 33;  // Encoder Otput 'B' must connected with intreput pin of arduino.
+  int encoderPin2A = 32;  // Encoder Output 'A' must connected with intreput pin of arduino.
+  int encoderPin2B = 33;  // Encoder Otput 'B' must connected with intreput pin of arduino.
 
-int encoderPin3A = 23;  // Encoder Output 'A' must connected with intreput pin of arduino.
-int encoderPin3B = 22;  // Encoder Otput 'B' must connected with intreput pin of arduino.
+  int encoderPin3A = 23;  // Encoder Output 'A' must connected with intreput pin of arduino.
+  int encoderPin3B = 22;  // Encoder Otput 'B' must connected with intreput pin of arduino.
 
-int encoderPin1A = 26;  // Encoder Output 'A' must connected with intreput pin of arduino.
-int encoderPin1B = 13;  // Encoder Otput 'B' must connected with intreput pin of arduino.
+  int encoderPin1A = 26;  // Encoder Output 'A' must connected with intreput pin of arduino.
+  int encoderPin1B = 13;  // Encoder Otput 'B' must connected with intreput pin of arduino.
 
-int sensor1Pin = 36; //SP
-int sensor2Pin = 39; // SN
-int sensor3Pin = 34;
+  int sensor1Pin = 36;  //SP
+  int sensor2Pin = 39;  // SN
+  int sensor3Pin = 34;
 
-int MSB3;
-int LSB3;
+  int actuatorPin = 16;
+  bool actuator = false;
+  bool actuatorUpdate = false;
 
-String readString;  // This while store the user inputTheta1 data
+  int MSB3;
+  int LSB3;
 
-float theta1, theta2, theta3;
-float theta1Update, theta2Update, theta3Update;
-float Px, Py, Pz;
-float PxUpdate, PyUpdate, PzUpdate;
+  String readString;  // This while store the user inputTheta1 data
 
-
-int flagSensor1 = 0;
-int flagSensor2 = 0;
-int flagSensor3 = 0;
-
-float L1 = 114.55, L2 = 162, L3 = 130, d1 = 164.54, d2 = 69.5, d3 = 16;
-
-int User_Input = 0;  // This while convert inputTheta1 string into integer
-
-volatile int lastEncoded1 = 0;  // Here updated value of encoder store.
-volatile int lastEncoded2 = 0;  // Here updated value of encoder store.
-volatile int lastEncoded3 = 0;  // Here updated value of encoder store.
-
-volatile long encoderValue1 = 0;  // Raw encoder value
-volatile long encoderValue2 = 0;  // Raw encoder value
-volatile long encoderValue3 = 0;  // Raw encoder value
-
-// int PPR = 1600;                 // Encoder Pulse per revolution.
-// int angle = 360;                // Maximum degree of motion.
-int REV_Theta1 = 0;  // Set point REQUIRED ENCODER VALUE
-int REV_Theta2 = 0;  // Set point REQUIRED ENCODER VALUE
-int REV_Theta3 = 0;  // Set point REQUIRED ENCODER VALUE
-// int lastMSB = 0;
-// int lastLSB = 0;
-// OK PID
-double kp = 3, ki = 0, kd = 0.1;     // 5        // modify for optimal performance
-double kp3 = 3, ki3 = 0, kd3 = 0.1;  // 5        // modify for optimal performance
+  float theta1, theta2, theta3;
+  float theta1Update, theta2Update, theta3Update;
+  float Px, Py, Pz;
+  float PxUpdate, PyUpdate, PzUpdate;
 
 
-double inputTheta1 = 0, outputTheta1 = 0, setpointTheta1 = 0;
-double inputTheta2 = 0, outputTheta2 = 0, setpointTheta2 = 0;
-double inputTheta3 = 0, outputTheta3 = 0, setpointTheta3 = 0;
-PID PidTheta1(&inputTheta1, &outputTheta1, &setpointTheta1, kp, ki, kd, DIRECT);
-PID PidTheta2(&inputTheta2, &outputTheta2, &setpointTheta2, kp, ki, kd, DIRECT);
-PID PidTheta3(&inputTheta3, &outputTheta3, &setpointTheta3, kp, ki, kd, DIRECT);
+  int flagSensor1 = 0;
+  int flagSensor2 = 0;
+  int flagSensor3 = 0;
 
-unsigned long timeMillis;
+  float L1 = 114.55, L2 = 162, L3 = 130, d1 = 164.54, d2 = 69.5, d3 = 16;
 
-bool isStarter = true;
-bool isRestart = false;
-bool isGoHome = false;
-bool step2Restart = false;
-bool doneStarting = false;
-bool doneRestart = false;
-#include "serialInput.h"
-#include "display.h"
-#include "kinematics.h"
-#include "firebaseConnectEsp.h"
-#include "starter.h"
-void setup() {
-  Serial.begin(115200);
-  pinMode(led1, OUTPUT);
-  pinMode(led2, OUTPUT);
-  Serial.println("Setup Starting");
+  int User_Input = 0;  // This while convert inputTheta1 string into integer
 
-  pinMode(MotEnable1, OUTPUT);
-  pinMode(MotFwd1, OUTPUT);
-  pinMode(MotRev1, OUTPUT);
+  volatile int lastEncoded1 = 0;  // Here updated value of encoder store.
+  volatile int lastEncoded2 = 0;  // Here updated value of encoder store.
+  volatile int lastEncoded3 = 0;  // Here updated value of encoder store.
 
-  pinMode(MotEnable2, OUTPUT);
-  pinMode(MotFwd2, OUTPUT);
-  pinMode(MotRev2, OUTPUT);
+  volatile long encoderValue1 = 0;  // Raw encoder value
+  volatile long encoderValue2 = 0;  // Raw encoder value
+  volatile long encoderValue3 = 0;  // Raw encoder value
 
-  pinMode(MotEnable3, OUTPUT);
-  pinMode(MotFwd3, OUTPUT);
-  pinMode(MotRev3, OUTPUT);
+  // int PPR = 1600;                 // Encoder Pulse per revolution.
+  // int angle = 360;                // Maximum degree of motion.
+  int REV_Theta1 = 0;  // Set point REQUIRED ENCODER VALUE
+  int REV_Theta2 = 0;  // Set point REQUIRED ENCODER VALUE
+  int REV_Theta3 = 0;  // Set point REQUIRED ENCODER VALUE
+  // int lastMSB = 0;
+  // int lastLSB = 0;
+  // OK PID
+  double kp = 3, ki = 0, kd = 0.1;     // 5        // modify for optimal performance
+  double kp3 = 3, ki3 = 0, kd3 = 0.1;  // 5        // modify for optimal performance
 
-  pinMode(sensor1Pin, INPUT);
-  pinMode(sensor2Pin, INPUT);
-  pinMode(sensor3Pin, INPUT);
 
-  pinMode(encoderPin1A, INPUT_PULLUP);
-  pinMode(encoderPin1B, INPUT_PULLUP);
+  double inputTheta1 = 0, outputTheta1 = 0, setpointTheta1 = 0;
+  double inputTheta2 = 0, outputTheta2 = 0, setpointTheta2 = 0;
+  double inputTheta3 = 0, outputTheta3 = 0, setpointTheta3 = 0;
+  PID PidTheta1(&inputTheta1, &outputTheta1, &setpointTheta1, kp, ki, kd, DIRECT);
+  PID PidTheta2(&inputTheta2, &outputTheta2, &setpointTheta2, kp, ki, kd, DIRECT);
+  PID PidTheta3(&inputTheta3, &outputTheta3, &setpointTheta3, kp, ki, kd, DIRECT);
 
-  pinMode(encoderPin2A, INPUT_PULLUP);
-  pinMode(encoderPin2B, INPUT_PULLUP);
+  unsigned long timeMillis;
 
-  pinMode(encoderPin3A, INPUT_PULLUP);
-  pinMode(encoderPin3B, INPUT_PULLUP);
+  bool isStarter = true;
+  bool isRestart = false;
+  bool isGoHome = false;
+  bool step2Restart = false;
+  bool doneStarting = false;
+  bool doneRestart = false;
+  #include "serialInput.h"
+  #include "display.h"
+  #include "kinematics.h"
+  #include "firebaseConnectEsp.h"
+  #include "starter.h"
+  void setup() {
+    Serial.begin(115200);
+    pinMode(16, OUTPUT);
+    digitalWrite(16, LOW);
+    Serial.println("Setup Starting");
 
-  digitalWrite(encoderPin1A, HIGH);  // turn pullup resistor on
-  digitalWrite(encoderPin1B, HIGH);  // turn pullup resistor on
+    pinMode(MotEnable1, OUTPUT);
+    pinMode(MotFwd1, OUTPUT);
+    pinMode(MotRev1, OUTPUT);
 
-  digitalWrite(encoderPin2A, HIGH);  // turn pullup resistor on
-  digitalWrite(encoderPin2B, HIGH);  // turn pullup resistor on
+    pinMode(MotEnable2, OUTPUT);
+    pinMode(MotFwd2, OUTPUT);
+    pinMode(MotRev2, OUTPUT);
 
-  digitalWrite(encoderPin3A, HIGH);  // turn pullup resistor on
-  digitalWrite(encoderPin3B, HIGH);  // turn pullup resistor on
-  // call updateEncoder() when any high/low changed seen
-  // on interrupt 0 (pin 2), or interrupt 1 (pin 3)
-  attachInterrupt(encoderPin1A, updateEncoder1, CHANGE);
-  attachInterrupt(encoderPin1B, updateEncoder1, CHANGE);
+    pinMode(MotEnable3, OUTPUT);
+    pinMode(MotFwd3, OUTPUT);
+    pinMode(MotRev3, OUTPUT);
 
-  attachInterrupt(encoderPin2A, updateEncoder2, CHANGE);
-  attachInterrupt(encoderPin2B, updateEncoder2, CHANGE);
+    pinMode(sensor1Pin, INPUT);
+    pinMode(sensor2Pin, INPUT);
+    pinMode(sensor3Pin, INPUT);
 
-  attachInterrupt(encoderPin3A, updateEncoder3, CHANGE);
-  attachInterrupt(encoderPin3B, updateEncoder3, CHANGE);
+    pinMode(encoderPin1A, INPUT_PULLUP);
+    pinMode(encoderPin1B, INPUT_PULLUP);
 
-  //Interrupt endsensor
-  // attachInterrupt(sensor1Pin, turnOffMotor1, FALLING);
-  attachInterrupt(sensor2Pin, turnOffMotor2, FALLING);
-  attachInterrupt(sensor3Pin, turnOffMotor3, FALLING);
+    pinMode(encoderPin2A, INPUT_PULLUP);
+    pinMode(encoderPin2B, INPUT_PULLUP);
 
-  // TCCR1B = TCCR1B & 0b11111000 | 1; // set 31KHz PWM to prevent motor noise
-  PidTheta1.SetMode(AUTOMATIC);          // set PID in Auto mode
-  PidTheta1.SetSampleTime(1);            // refresh rate of PID controller
-  PidTheta1.SetOutputLimits(-255, 255);  // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
+    pinMode(encoderPin3A, INPUT_PULLUP);
+    pinMode(encoderPin3B, INPUT_PULLUP);
 
-  PidTheta2.SetMode(AUTOMATIC);          // set PID in Auto mode
-  PidTheta2.SetSampleTime(1);            // refresh rate of PID controller
-  PidTheta2.SetOutputLimits(-255, 240);  // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
+    digitalWrite(encoderPin1A, HIGH);  // turn pullup resistor on
+    digitalWrite(encoderPin1B, HIGH);  // turn pullup resistor on
 
-  PidTheta3.SetMode(AUTOMATIC);          // set PID in Auto mode
-  PidTheta3.SetSampleTime(1);            // refresh rate of PID controller
-  PidTheta3.SetOutputLimits(-255, 240);  // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
+    digitalWrite(encoderPin2A, HIGH);  // turn pullup resistor on
+    digitalWrite(encoderPin2B, HIGH);  // turn pullup resistor on
 
-  timeMillis = millis();
-  // Firebase
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  Serial.print("Dang ket noi");
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
-    delay(500);
-  }
+    digitalWrite(encoderPin3A, HIGH);  // turn pullup resistor on
+    digitalWrite(encoderPin3B, HIGH);  // turn pullup resistor on
+    // call updateEncoder() when any high/low changed seen
+    // on interrupt 0 (pin 2), or interrupt 1 (pin 3)
+    attachInterrupt(encoderPin1A, updateEncoder1, CHANGE);
+    attachInterrupt(encoderPin1B, updateEncoder1, CHANGE);
 
-  Serial.println("");
-  Serial.println("Da ket noi WiFi!");
-  Serial.println(WiFi.localIP());
+    attachInterrupt(encoderPin2A, updateEncoder2, CHANGE);
+    attachInterrupt(encoderPin2B, updateEncoder2, CHANGE);
 
-  /* Assign the api key (required) */
-  config.api_key = API_KEY;
+    attachInterrupt(encoderPin3A, updateEncoder3, CHANGE);
+    attachInterrupt(encoderPin3B, updateEncoder3, CHANGE);
 
-  /* Assign the RTDB URL (required) */
-  config.database_url = DATABASE_URL;
+    //Interrupt endsensor
+    // attachInterrupt(sensor1Pin, turnOffMotor1, FALLING);
+    attachInterrupt(sensor2Pin, turnOffMotor2, FALLING);
+    attachInterrupt(sensor3Pin, turnOffMotor3, FALLING);
 
-  /* Sign up */
-  if (Firebase.signUp(&config, &auth, "", "")) {
-    Serial.println("ok");
-    signupOK = true;
-  } else {
-    Serial.printf("%s\n", config.signer.signupError.message.c_str());
-  }
+    // TCCR1B = TCCR1B & 0b11111000 | 1; // set 31KHz PWM to prevent motor noise
+    PidTheta1.SetMode(AUTOMATIC);          // set PID in Auto mode
+    PidTheta1.SetSampleTime(1);            // refresh rate of PID controller
+    PidTheta1.SetOutputLimits(-255, 255);  // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
 
-  /* Assign the callback function for the long running token generation task */
-  // config.token_status_callback = tokenStatusCallback; //see addons/TokenHelper.h
+    PidTheta2.SetMode(AUTOMATIC);          // set PID in Auto mode
+    PidTheta2.SetSampleTime(1);            // refresh rate of PID controller
+    PidTheta2.SetOutputLimits(-255, 240);  // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
 
-  Firebase.begin(&config, &auth);
-  Firebase.reconnectWiFi(true);
+    PidTheta3.SetMode(AUTOMATIC);          // set PID in Auto mode
+    PidTheta3.SetSampleTime(1);            // refresh rate of PID controller
+    PidTheta3.SetOutputLimits(-255, 240);  // this is the MAX PWM value to move motor, here change in value reflect change in speed of motor.
+
+    timeMillis = millis();
+    // Firebase
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    Serial.print("Dang ket noi");
+    while (WiFi.status() != WL_CONNECTED) {
+      Serial.print(".");
+      delay(500);
+    }
+
+    Serial.println("");
+    Serial.println("Da ket noi WiFi!");
+    Serial.println(WiFi.localIP());
+
+    /* Assign the api key (required) */
+    config.api_key = API_KEY;
+
+    /* Assign the RTDB URL (required) */
+    config.database_url = DATABASE_URL;
+
+    /* Sign up */
+    if (Firebase.signUp(&config, &auth, "", "")) {
+      Serial.println("ok");
+      signupOK = true;
+    } else {
+      Serial.printf("%s\n", config.signer.signupError.message.c_str());
+    }
+
+    /* Assign the callback function for the long running token generation task */
+    // config.token_status_callback = tokenStatusCallback; //see addons/TokenHelper.h
+
+    Firebase.begin(&config, &auth);
+    Firebase.reconnectWiFi(true);
 
   delay(1000);
   Serial.println("Setup Done");
@@ -223,11 +227,11 @@ void Task1code(void* pvParameters) {
   Serial.print("Task1 running on core ");
   Serial.println(xPortGetCoreID());
   if (isStarter) {
-      start();
-      resetRotation();
-      Serial.print("RESET rotation DONE");
-      delay(1000);
-      // getBeginRotation();
+    start();
+    resetRotation();
+    Serial.print("RESET rotation DONE");
+    delay(1000);
+    // getBeginRotation();
   }
   for (;;) {
     TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE;
@@ -275,7 +279,7 @@ void Task1code(void* pvParameters) {
     if (doneStarting) {
       resetRotation();
       doneStarting = false;
-    }    
+    }
     if (step2Restart == true && REV_Theta1 <= encoderValue1 && REV_Theta2 <= encoderValue2 && REV_Theta3 <= encoderValue3) {
       step2Restart = false;
       resetRotation();
@@ -299,7 +303,7 @@ void Task2code(void* pvParameters) {
       // forwardKinematic();
     }
     if (doneRestart) {
-      Firebase.RTDB.setBool(&fbdo,"/Theta/goHome", false);
+      Firebase.RTDB.setBool(&fbdo, "/Theta/goHome", false);
       delay(1000);
       doneRestart = false;
     }

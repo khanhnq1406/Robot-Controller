@@ -4,7 +4,7 @@ void turnOffMotor1();
 void turnOffMotor2();
 void turnOffMotor3();
 int starterX = 0;
-int starterY = 150;
+int starterY = 180;
 int starterZ = 160;
 void getBeginRotation() {
   theta1 = 0;
